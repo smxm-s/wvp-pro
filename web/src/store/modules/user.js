@@ -4,11 +4,14 @@ import {
   changePassword,
   changePasswordForAdmin,
   changePushKey,
+  getMyPermission,
   getUserInfo,
+  getUserRegion,
   login,
   logout,
   queryList,
-  removeById
+  removeById,
+  saveUserRegion
 } from '@/api/user'
 import {
   getToken,
@@ -20,17 +23,24 @@ import {
   removeServerId,
   getDefaultPassword,
   setDefaultPassword,
-  removeDefaultPassword
+  removeDefaultPassword,
+  getPermission,
+  setPermission,
+  removePermission
 } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
+  const permission = getPermission()
   return {
     token: getToken(),
     name: '',
     serverId: '',
     defaultPassword: getDefaultPassword(),
-    showConfirmBoxForLoginLose: true
+    showConfirmBoxForLoginLose: true,
+    permissions: (permission && permission.permissions) || [],
+    superAdmin: (permission && permission.superAdmin) || false,
+    roleName: (permission && permission.roleName) || ''
   }
 }
 
@@ -54,12 +64,21 @@ const mutations = {
   },
   SET_CONFIRM_BOX: (state, status) => {
     state.showConfirmBoxForLoginLose = status
+  },
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions || []
+  },
+  SET_SUPER_ADMIN: (state, superAdmin) => {
+    state.superAdmin = !!superAdmin
+  },
+  SET_ROLE_NAME: (state, roleName) => {
+    state.roleName = roleName || ''
   }
 }
 
 const actions = {
   // user login
-  login({ commit }, userInfo) {
+  login({ commit, dispatch }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({
@@ -76,7 +95,12 @@ const actions = {
         setName(data.username)
         setServerId(data.serverId)
         setDefaultPassword(data.defaultPassword)
-        resolve()
+        // 登录成功后拉取当前用户权限
+        dispatch('fetchPermission').then(() => {
+          resolve()
+        }).catch(() => {
+          resolve()
+        })
       }).catch(error => {
         reject(error)
       })
@@ -90,6 +114,7 @@ const actions = {
         removeServerId()
         removeName()
         removeDefaultPassword()
+        removePermission()
         resetRouter()
         commit('RESET_STATE')
         resolve()
@@ -103,8 +128,28 @@ const actions = {
   resetToken({ commit }) {
     return new Promise(resolve => {
       removeToken() // must remove  token  first
+      removePermission()
       commit('RESET_STATE')
       resolve()
+    })
+  },
+
+  // 获取当前登录用户的权限
+  fetchPermission({ commit }) {
+    return new Promise((resolve, reject) => {
+      getMyPermission().then(response => {
+        const { data } = response
+        const permissions = (data && data.permissions) || []
+        const superAdmin = !!(data && data.superAdmin)
+        const roleName = (data && data.roleName) || ''
+        commit('SET_PERMISSIONS', permissions)
+        commit('SET_SUPER_ADMIN', superAdmin)
+        commit('SET_ROLE_NAME', roleName)
+        setPermission({ permissions: permissions, superAdmin: superAdmin, roleName: roleName })
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
     })
   },
 
@@ -180,6 +225,28 @@ const actions = {
   changePasswordForAdmin({ commit }, params) {
     return new Promise((resolve, reject) => {
       changePasswordForAdmin(params).then(response => {
+        const { data } = response
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  getUserRegion({ commit }, userId) {
+    return new Promise((resolve, reject) => {
+      getUserRegion(userId).then(response => {
+        const { data } = response
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  saveUserRegion({ commit }, params) {
+    return new Promise((resolve, reject) => {
+      saveUserRegion(params).then(response => {
         const { data } = response
         resolve(data)
       }).catch(error => {

@@ -6,6 +6,7 @@ import com.genersoft.iot.vmp.common.InviteSessionType;
 import com.genersoft.iot.vmp.common.StreamInfo;
 import com.genersoft.iot.vmp.conf.UserSetting;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
+import com.genersoft.iot.vmp.conf.security.DataScopeService;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -77,11 +79,15 @@ public class PlayController {
 	@Autowired
 	private IDeviceChannelService deviceChannelService;
 
+	@Autowired
+	private DataScopeService dataScopeService;
+
 	@Operation(summary = "开始点播", security = @SecurityRequirement(name = JwtUtils.HEADER))
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@GetMapping("/start/{deviceId}/{channelId}")
-	public DeferredResult<WVPResult<StreamContent>> play(HttpServletRequest request, @PathVariable String deviceId,
+	@PreAuthorize("@perm.has('channel:play')")
+    public DeferredResult<WVPResult<StreamContent>> play(HttpServletRequest request, @PathVariable String deviceId,
 														 @PathVariable String channelId) {
 
 		log.info("[开始点播] deviceId：{}, channelId：{}, ", deviceId, channelId);
@@ -92,6 +98,10 @@ public class PlayController {
 		Assert.notNull(device, "设备不存在");
 		DeviceChannel channel = deviceChannelService.getOne(deviceId, channelId);
 		Assert.notNull(channel, "通道不存在");
+		// 数据范围校验：受限用户只能点播允许范围内的通道（channel.getId() 即 wvp_device_channel.id）
+		if (!dataScopeService.isChannelAllowed(channel.getId())) {
+			throw new ControllerException(ErrorCode.ERROR403);
+		}
 
 		DeferredResult<WVPResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 
@@ -147,7 +157,8 @@ public class PlayController {
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@GetMapping("/stop/{deviceId}/{channelId}")
-	public JSONObject playStop(@PathVariable String deviceId, @PathVariable String channelId) {
+	@PreAuthorize("@perm.has('channel:play')")
+    public JSONObject playStop(@PathVariable String deviceId, @PathVariable String channelId) {
 
 		log.debug(String.format("设备预览/回放停止API调用，streamId：%s_%s", deviceId, channelId ));
 
@@ -173,7 +184,8 @@ public class PlayController {
 	@Parameter(name = "key", description = "视频流key", required = true)
 	@Parameter(name = "mediaServerId", description = "流媒体服务ID", required = true)
 	@PostMapping("/convertStop/{key}")
-	public void playConvertStop(@PathVariable String key, String mediaServerId) {
+	@PreAuthorize("@perm.has('channel:play')")
+    public void playConvertStop(@PathVariable String key, String mediaServerId) {
 		if (mediaServerId == null) {
 			throw new ControllerException(ErrorCode.ERROR400.getCode(), "流媒体：" + mediaServerId + "不存在" );
 		}
@@ -194,6 +206,7 @@ public class PlayController {
 	@Parameter(name = "timeout", description = "推流超时时间(秒)", required = true)
 	@GetMapping("/broadcast/{deviceId}/{channelId}")
 	@PostMapping("/broadcast/{deviceId}/{channelId}")
+    @PreAuthorize("@perm.has('channel:broadcast')")
     public AudioBroadcastResult broadcastApi(@PathVariable String deviceId, @PathVariable String channelId, Integer timeout, Boolean broadcastMode) {
 		if (log.isDebugEnabled()) {
 			log.debug("语音广播API调用");
@@ -208,7 +221,8 @@ public class PlayController {
 	@Parameter(name = "channelId", description = "通道Id", required = true)
 	@GetMapping("/broadcast/stop/{deviceId}/{channelId}")
 	@PostMapping("/broadcast/stop/{deviceId}/{channelId}")
-	public void stopBroadcast(@PathVariable String deviceId, @PathVariable String channelId) {
+	@PreAuthorize("@perm.has('channel:broadcast')")
+    public void stopBroadcast(@PathVariable String deviceId, @PathVariable String channelId) {
 		if (log.isDebugEnabled()) {
 			log.debug("停止语音广播API调用");
 		}
@@ -221,7 +235,8 @@ public class PlayController {
 
 	@Operation(summary = "获取所有的ssrc", security = @SecurityRequirement(name = JwtUtils.HEADER))
 	@GetMapping("/ssrc")
-	public JSONObject getSSRC() {
+	@PreAuthorize("@perm.has('channel:play')")
+    public JSONObject getSSRC() {
 		if (log.isDebugEnabled()) {
 			log.debug("获取所有的ssrc");
 		}
@@ -246,7 +261,8 @@ public class PlayController {
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@GetMapping("/snap")
-	public DeferredResult<String> getSnap(String deviceId, String channelId) {
+	@PreAuthorize("@perm.has('channel:play')")
+    public DeferredResult<String> getSnap(String deviceId, String channelId) {
 		if (log.isDebugEnabled()) {
 			log.debug("获取截图: {}/{}", deviceId, channelId);
 		}

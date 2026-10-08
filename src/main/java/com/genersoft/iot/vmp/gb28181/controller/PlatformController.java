@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,7 @@ public class PlatformController {
 
     @Operation(summary = "获取国标服务的配置", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/server_config")
+    @PreAuthorize("@perm.has('platform:view')")
     public JSONObject serverConfig() {
         JSONObject result = new JSONObject();
         result.put("deviceIp", sipConfig.getShowIp());
@@ -60,6 +62,7 @@ public class PlatformController {
     @Operation(summary = "获取级联服务器信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "平台国标编号", required = true)
     @GetMapping("/info/{id}")
+    @PreAuthorize("@perm.has('platform:view')")
     public Platform getPlatform(@PathVariable String id) {
         Platform parentPlatform = platformService.queryPlatformByServerGBId(id);
         if (parentPlatform != null) {
@@ -74,6 +77,7 @@ public class PlatformController {
     @Parameter(name = "page", description = "当前页")
     @Parameter(name = "count", description = "每页查询数量")
     @Parameter(name = "query", description = "查询内容")
+    @PreAuthorize("@perm.has('platform:view')")
     public PageInfo<Platform> platforms(int page, int count,
                                         @RequestParam(required = false) String query) {
 
@@ -90,6 +94,7 @@ public class PlatformController {
     @Operation(summary = "添加上级平台信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/add")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void add(@RequestBody Platform platform) {
 
         Assert.notNull(platform.getName(), "平台名称不可为空");
@@ -134,6 +139,7 @@ public class PlatformController {
     @Operation(summary = "更新上级平台信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/update")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void updatePlatform(@RequestBody Platform parentPlatform) {
 
         if (ObjectUtils.isEmpty(parentPlatform.getName())
@@ -156,6 +162,7 @@ public class PlatformController {
     @Parameter(name = "id", description = "上级平台ID")
     @DeleteMapping("/delete")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public WVPResult<?> deletePlatform(Integer id) {
 
         if (log.isDebugEnabled()) {
@@ -173,6 +180,7 @@ public class PlatformController {
     @Parameter(name = "serverGBId", description = "上级平台的国标编号")
     @GetMapping("/exit/{serverGBId}")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:view')")
     public Boolean exitPlatform(@PathVariable String serverGBId) {
         Platform platform = platformService.queryPlatformByServerGBId(serverGBId);
         return platform != null;
@@ -188,6 +196,7 @@ public class PlatformController {
     @Parameter(name = "hasShare", description = "是否已经共享")
     @GetMapping("/channel/list")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:view')")
     public PageInfo<PlatformChannel> queryChannelList(int page, int count,
                                                       @RequestParam(required = false) Integer platformId,
                                                       @RequestParam(required = false) String query,
@@ -206,6 +215,7 @@ public class PlatformController {
     @Operation(summary = "向上级平台添加国标通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/channel/add")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void addChannel(@RequestBody UpdateChannelParam param) {
 
         if (log.isDebugEnabled()) {
@@ -228,6 +238,7 @@ public class PlatformController {
     @Operation(summary = "从上级平台移除国标通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @DeleteMapping("/channel/remove")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void delChannelForGB(@RequestBody UpdateChannelParam param) {
 
         if (log.isDebugEnabled()) {
@@ -251,6 +262,7 @@ public class PlatformController {
     @Parameter(name = "id", description = "平台ID", required = true)
     @GetMapping("/channel/push")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void pushChannel(Integer id) {
         Assert.notNull(id, "平台ID不可为空");
         platformChannelService.pushChannel(id);
@@ -259,6 +271,7 @@ public class PlatformController {
     @Operation(summary = "添加通道-通过设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/channel/device/add")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void addChannelByDevice(@RequestBody UpdateChannelParam param) {
         Assert.notNull(param.getPlatformId(), "平台ID不可为空");
         Assert.notNull(param.getDeviceIds(), "设备ID不可为空");
@@ -269,6 +282,7 @@ public class PlatformController {
     @Operation(summary = "移除通道-通过设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/channel/device/remove")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void removeChannelByDevice(@RequestBody UpdateChannelParam param) {
         Assert.notNull(param.getPlatformId(), "平台ID不可为空");
         Assert.notNull(param.getDeviceIds(), "设备ID不可为空");
@@ -279,6 +293,7 @@ public class PlatformController {
     @Operation(summary = "自定义共享通道信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/channel/custom/update")
     @ResponseBody
+    @PreAuthorize("@perm.has('platform:edit')")
     public void updateCustomChannel(@RequestBody PlatformChannel channel) {
         Assert.isTrue(channel.getId() > 0, "共享通道ID必须存在");
         platformChannelService.updateCustomChannel(channel);

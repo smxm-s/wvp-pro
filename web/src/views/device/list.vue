@@ -25,7 +25,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button icon="el-icon-plus" style="margin-right: 1rem;" type="primary" @click="add">添加设备</el-button>
+        <el-button v-permission="'device:edit'" icon="el-icon-plus" style="margin-right: 1rem;" type="primary" @click="add">添加设备</el-button>
         <el-button icon="el-icon-info" style="margin-right: 1rem;" @click="showInfo()">接入信息
         </el-button>
       </el-form-item>
@@ -152,9 +152,9 @@
           >通道
           </el-button>
           <el-divider direction="vertical" />
-          <el-button size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">编辑</el-button>
+          <el-button v-permission="'device:edit'" size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">编辑</el-button>
           <el-divider direction="vertical" />
-          <el-button size="medium" type="text" style="color: #f56c6c" @click="deleteDevice(scope.row)">删除</el-button>
+          <el-button v-permission="'device:edit'" size="medium" type="text" style="color: #f56c6c" @click="deleteDevice(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

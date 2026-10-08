@@ -21,6 +21,13 @@ export function getUserInfo() {
   })
 }
 
+export function getMyPermission() {
+  return request({
+    method: 'get',
+    url: '/api/user/permission'
+  })
+}
+
 export function changePushKey(params) {
   const { pushKey, userId } = params
   return request({
@@ -86,6 +93,30 @@ export function changePasswordForAdmin(params) {
     params: {
       password: password,
       userId: userId
+    }
+  })
+}
+
+// 查询用户已绑定的区域ID列表
+export function getUserRegion(userId) {
+  return request({
+    method: 'get',
+    url: '/api/user/region',
+    params: {
+      userId: userId
+    }
+  })
+}
+
+// 保存用户绑定的区域
+export function saveUserRegion(params) {
+  const { userId, regionIds } = params
+  return request({
+    method: 'post',
+    url: '/api/user/region/save',
+    params: {
+      userId: userId,
+      regionIds: regionIds
     }
   })
 }

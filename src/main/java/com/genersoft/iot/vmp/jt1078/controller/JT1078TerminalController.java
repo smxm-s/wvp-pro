@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -32,6 +33,7 @@ public class JT1078TerminalController {
     @Parameter(name = "query", description = "查询内容")
     @Parameter(name = "online", description = "是否在线")
     @GetMapping("/list")
+    @PreAuthorize("@perm.has('jt:view')")
     public PageInfo<JTDevice> getDevices(int page, int count,
                                          @RequestParam(required = false) String query,
                                          @RequestParam(required = false) Boolean online) {
@@ -41,6 +43,7 @@ public class JT1078TerminalController {
     @Operation(summary = "更新设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "device", description = "设备", required = true)
     @PostMapping("/update")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void updateDevice(JTDevice device){
         assert device.getId() > 0;
         assert device.getPhoneNumber() != null;
@@ -50,6 +53,7 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-新增设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "device", description = "设备", required = true)
     @PostMapping("/add")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void addDevice(JTDevice device){
         assert device.getPhoneNumber() != null;
         String phoneNumber = device.getPhoneNumber().replaceFirst("^0*", "");
@@ -59,6 +63,7 @@ public class JT1078TerminalController {
     @Operation(summary = "删除设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @DeleteMapping("/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void addDevice(String phoneNumber){
         assert phoneNumber != null;
         service.deleteDeviceByPhoneNumber(phoneNumber);
@@ -66,6 +71,7 @@ public class JT1078TerminalController {
     @Operation(summary = "查询设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @GetMapping("/query")
+    @PreAuthorize("@perm.has('jt:view')")
     public JTDevice getDevice(Integer deviceId){
         return service.getDeviceById(deviceId);
     }
@@ -77,6 +83,7 @@ public class JT1078TerminalController {
     @Parameter(name = "deviceId", description = "设备ID", required = true)
     @Parameter(name = "query", description = "查询内容")
     @GetMapping("/channel/list")
+    @PreAuthorize("@perm.has('jt:view')")
     public PageInfo<JTChannel> getChannels(int page, int count,
                                            @RequestParam(required = true) Integer deviceId,
                                            @RequestParam(required = false) String query) {
@@ -87,6 +94,7 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-查询单个部标通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "通道数据库ID", required = true)
     @GetMapping("/channel/one")
+    @PreAuthorize("@perm.has('jt:view')")
     public JTChannel getChannel(Integer id) {
         assert id != null;
         return service.getChannelByDbId(id);
@@ -95,6 +103,7 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-更新通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "channel", description = "通道", required = true)
     @PostMapping("/channel/update")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void updateChannel(@RequestBody JTChannel channel){
         assert channel.getId() > 0;
         assert channel.getChannelId() != null;
@@ -104,6 +113,7 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-新增通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "channel", description = "通道", required = true)
     @PostMapping("/channel/add")
+    @PreAuthorize("@perm.has('jt:edit')")
     public JTChannel addChannel(@RequestBody JTChannel channel){
         assert channel.getChannelId() != null;
         assert channel.getTerminalDbId() != 0;
@@ -113,6 +123,7 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-删除通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "通道的数据库ID", required = true)
     @DeleteMapping("/channel/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void deleteChannel(Integer id){
         service.deleteChannelById(id);
     }

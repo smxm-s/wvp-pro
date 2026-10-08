@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -59,6 +60,7 @@ public class MediaController {
     @Parameter(name = "useSourceIpAsStreamIp", description = "是否使用请求IP作为返回的地址IP")
     @GetMapping(value = "/stream_info_by_app_and_stream")
     @ResponseBody
+    @PreAuthorize("@perm.has('channel:play')")
     public DeferredResult<WVPResult<StreamContent>> getStreamInfoByAppAndStream(HttpServletRequest request, @RequestParam String app,
                                                                                 @RequestParam String stream,
                                                                                 @RequestParam(required = false) String mediaServerId,
@@ -138,6 +140,7 @@ public class MediaController {
     @Parameter(name = "app", description = "应用名", required = true)
     @Parameter(name = "stream", description = "流id", required = true)
     @Parameter(name = "mediaServerId", description = "媒体服务器id")
+    @PreAuthorize("@perm.has('channel:play')")
     public StreamContent getPlayUrl(@RequestParam String app, @RequestParam String stream,
                                     @RequestParam(required = false) String mediaServerId){
         boolean authority = false;

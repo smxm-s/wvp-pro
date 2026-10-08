@@ -6,6 +6,7 @@ import com.genersoft.iot.vmp.vmanager.bean.WVPResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,18 @@ public class GlobalExceptionHandler {
     public WVPResult<String> exceptionHandler(Exception e) {
         log.error("[全局异常]： ", e);
         return WVPResult.fail(ErrorCode.ERROR500.getCode(), e.getMessage());
+    }
+
+    /**
+     * 无权限访问（@PreAuthorize 鉴权未通过）
+     * @param e 异常
+     * @return 统一返回结果
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public WVPResult<String> exceptionHandler(AccessDeniedException e) {
+        log.warn("[无权限访问]： {}", e.getMessage());
+        return WVPResult.fail(ErrorCode.ERROR403.getCode(), "无权限访问");
     }
 
     /**

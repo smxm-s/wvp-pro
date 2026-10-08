@@ -115,6 +115,12 @@ public interface CommonGBChannelMapper {
     @SelectProvider(type = ChannelProvider.class, method = "queryById")
     CommonGBChannel queryById(@Param("gbId") int gbId);
 
+    /**
+     * 查询通道的行政区划编码（coalesce(gb_civil_code, civil_code)）
+     */
+    @Select("select coalesce(gb_civil_code, civil_code) from wvp_device_channel where id = #{gbId}")
+    String queryCivilCodeById(@Param("gbId") int gbId);
+
     @Delete(value = {"delete from wvp_device_channel where id = #{gbId} "})
     void delete(int gbId);
 
@@ -268,13 +274,15 @@ public interface CommonGBChannelMapper {
 
     @SelectProvider(type = ChannelProvider.class, method = "queryListByCivilCode")
     List<CommonGBChannel> queryListByCivilCode(@Param("query") String query, @Param("online") Boolean online,
-                                               @Param("dataType") Integer dataType, @Param("civilCode") String civilCode);
+                                               @Param("dataType") Integer dataType, @Param("civilCode") String civilCode,
+                                               @Param("civilCodeList") List<String> civilCodeList);
 
 
 
     @SelectProvider(type = ChannelProvider.class, method = "queryListByParentId")
     List<CommonGBChannel> queryListByParentId(@Param("query") String query, @Param("online") Boolean online,
-                                              @Param("dataType") Integer dataType, @Param("groupDeviceId") String groupDeviceId);
+                                              @Param("dataType") Integer dataType, @Param("groupDeviceId") String groupDeviceId,
+                                              @Param("civilCodeList") List<String> civilCodeList);
 
 
 
@@ -485,7 +493,8 @@ public interface CommonGBChannelMapper {
     @SelectProvider(type = ChannelProvider.class, method = "queryList")
     List<CommonGBChannel> queryList(@Param("query") String query, @Param("online") Boolean online,
                                     @Param("hasRecordPlan") Boolean hasRecordPlan, @Param("dataType") Integer dataType,
-                                    @Param("civilCode") String civilCode, @Param("parentDeviceId") String parentDeviceId);
+                                    @Param("civilCode") String civilCode, @Param("parentDeviceId") String parentDeviceId,
+                                    @Param("civilCodeList") List<String> civilCodeList);
 
     @Update(value = {" <script>" +
             " UPDATE wvp_device_channel " +

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ public class GroupController {
     @Parameter(name = "group", description = "group", required = true)
     @ResponseBody
     @PostMapping("/add")
+    @PreAuthorize("@perm.has('org:edit')")
     public void add(@RequestBody Group group){
         groupService.add(group);
     }
@@ -39,6 +41,7 @@ public class GroupController {
     @Parameter(name = "parent", description = "所属分组编号", required = true)
     @ResponseBody
     @GetMapping("/tree/list")
+    @PreAuthorize("@perm.has('org:view')")
     public List<GroupTree> queryForTree(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Integer parent,
@@ -55,6 +58,7 @@ public class GroupController {
     @Parameter(name = "channel", description = "true为查询通道，false为查询节点", required = true)
     @ResponseBody
     @GetMapping("/tree/query")
+    @PreAuthorize("@perm.has('org:view')")
     public PageInfo<Group> queryTree(Integer page, Integer count,
                                       @RequestParam(required = true) String query
     ){
@@ -65,6 +69,7 @@ public class GroupController {
     @Parameter(name = "group", description = "Group", required = true)
     @ResponseBody
     @PostMapping("/update")
+    @PreAuthorize("@perm.has('org:edit')")
     public void update(@RequestBody Group group){
         groupService.update(group);
     }
@@ -73,6 +78,7 @@ public class GroupController {
     @Parameter(name = "id", description = "分组id", required = true)
     @ResponseBody
     @DeleteMapping("/delete")
+    @PreAuthorize("@perm.has('org:edit')")
     public void delete(Integer id){
         Assert.notNull(id, "分组id（deviceId）不需要存在");
         boolean result = groupService.delete(id);
@@ -85,6 +91,7 @@ public class GroupController {
     @Parameter(name = "deviceId", description = "当前的行政区划", required = false)
     @ResponseBody
     @GetMapping("/path")
+    @PreAuthorize("@perm.has('org:view')")
     public List<Group> getPath(String deviceId, String businessGroup){
         return groupService.getPath(deviceId, businessGroup);
     }

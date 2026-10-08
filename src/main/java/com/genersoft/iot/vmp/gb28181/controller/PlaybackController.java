@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,6 +78,7 @@ public class PlaybackController {
 	@Parameter(name = "startTime", description = "开始时间", required = true)
 	@Parameter(name = "endTime", description = "结束时间", required = true)
 	@GetMapping("/start/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public DeferredResult<WVPResult<StreamContent>> start(HttpServletRequest request, @PathVariable String deviceId, @PathVariable String channelId,
 														  String startTime, String endTime) {
 
@@ -141,6 +143,7 @@ public class PlaybackController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "stream", description = "流ID", required = true)
 	@GetMapping("/stop/{deviceId}/{channelId}/{stream}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public void playStop(
 			@PathVariable String deviceId,
 			@PathVariable String channelId,
@@ -163,6 +166,7 @@ public class PlaybackController {
 	@Operation(summary = "回放暂停", security = @SecurityRequirement(name = JwtUtils.HEADER))
 	@Parameter(name = "streamId", description = "回放流ID", required = true)
 	@GetMapping("/pause/{streamId}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public void playbackPause(@PathVariable String streamId) {
 		log.info("[回放暂停] streamId: {}", streamId);
 		try {
@@ -178,6 +182,7 @@ public class PlaybackController {
 	@Operation(summary = "回放恢复", security = @SecurityRequirement(name = JwtUtils.HEADER))
 	@Parameter(name = "streamId", description = "回放流ID", required = true)
 	@GetMapping("/resume/{streamId}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public void playResume(@PathVariable String streamId) {
 		log.info("playResume: "+streamId);
 		try {
@@ -193,6 +198,7 @@ public class PlaybackController {
 	@Parameter(name = "streamId", description = "回放流ID", required = true)
 	@Parameter(name = "seekTime", description = "拖动偏移量，单位s", required = true)
 	@GetMapping("/seek/{streamId}/{seekTime}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public void playbackSeek(@PathVariable String streamId, @PathVariable long seekTime) {
 		log.info("playSeek: "+streamId+", "+seekTime);
 		try {
@@ -206,6 +212,7 @@ public class PlaybackController {
 	@Parameter(name = "streamId", description = "回放流ID", required = true)
 	@Parameter(name = "speed", description = "倍速0.25 0.5 1、2、4、8", required = true)
 	@GetMapping("/speed/{streamId}/{speed}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public void playSpeed(@PathVariable String streamId, @PathVariable Double speed) {
 		Assert.notNull(speed, "倍速不存在");
 		log.info("playSpeed: "+streamId+", "+speed);

@@ -108,12 +108,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         user.setId(jwtUser.getUserId());
         user.setUsername(jwtUser.getUserName());
         user.setPassword(jwtUser.getPassword());
-        Role role = new Role();
-        role.setId(jwtUser.getRoleId());
-        user.setRole(role);
 
         // 加载真实用户（含 defaultPassword），用于默认密码访问限制
         User dbUser = userService.getUserById(jwtUser.getUserId());
+        // 角色需要携带 authority（权限码），否则 @PreAuthorize 无法鉴权
+        if (dbUser != null && dbUser.getRole() != null) {
+            user.setRole(dbUser.getRole());
+        } else {
+            Role role = new Role();
+            role.setId(jwtUser.getRoleId());
+            user.setRole(role);
+        }
         user.setDefaultPassword(dbUser != null && dbUser.isDefaultPassword());
 
         // 默认密码用户：仅允许修改密码与登出接口

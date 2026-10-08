@@ -46,6 +46,7 @@
         </el-form-item>
         <el-form-item>
           <el-button
+            v-permission="'alarm:handle'"
             size="mini"
             type="danger"
             icon="el-icon-delete"
@@ -57,6 +58,7 @@
         </el-form-item>
         <el-form-item>
           <el-button
+            v-permission="'alarm:handle'"
             size="mini"
             type="danger"
             plain
@@ -124,6 +126,7 @@
               @click="openPlayback(scope.row)"
             >回放</el-button>
             <el-button
+              v-permission="'alarm:handle'"
               size="medium"
               icon="el-icon-delete"
               style="color: #f56c6c"

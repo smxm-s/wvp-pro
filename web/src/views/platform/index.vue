@@ -15,6 +15,7 @@
         </el-form-item>
         <el-form-item>
           <el-button
+            v-permission="'platform:edit'"
             icon="el-icon-plus"
             size="mini"
             style="margin-right: 1rem;"
@@ -95,7 +96,7 @@
 
         <el-table-column label="操作" min-width="260" fixed="right">
           <template v-slot:default="scope">
-            <el-button size="medium" icon="el-icon-edit" type="text" @click="editPlatform(scope.row)">编辑</el-button>
+            <el-button v-permission="'platform:edit'" size="medium" icon="el-icon-edit" type="text" @click="editPlatform(scope.row)">编辑</el-button>
             <el-button size="medium" icon="el-icon-share" type="text" @click="chooseChannel(scope.row)">通道共享
             </el-button>
             <el-button
@@ -107,6 +108,7 @@
             >推送通道
             </el-button>
             <el-button
+              v-permission="'platform:edit'"
               size="medium"
               icon="el-icon-delete"
               type="text"

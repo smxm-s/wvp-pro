@@ -3,6 +3,7 @@ package com.genersoft.iot.vmp.gb28181.controller;
 import com.genersoft.iot.vmp.common.StreamInfo;
 import com.genersoft.iot.vmp.conf.UserSetting;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
+import com.genersoft.iot.vmp.conf.security.DataScopeService;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
 import com.genersoft.iot.vmp.gb28181.bean.*;
 import com.genersoft.iot.vmp.gb28181.controller.bean.*;
@@ -25,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -61,36 +63,44 @@ public class ChannelController {
     private UserSetting userSetting;
 
     @Autowired
+    private DataScopeService dataScopeService;
+
+    @Autowired
     private VectorTileCatch vectorTileCatch;
 
 
     @Operation(summary = "查询通道信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "通道的数据库自增Id", required = true)
     @GetMapping(value = "/one")
+    @PreAuthorize("@perm.has('device:view')")
     public CommonGBChannel getOne(int id){
         return channelService.getOne(id);
     }
 
     @Operation(summary = "获取行业编码列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/industry/list")
+    @PreAuthorize("@perm.has('device:view')")
     public List<IndustryCodeType> getIndustryCodeList(){
         return channelService.getIndustryCodeList();
     }
 
     @Operation(summary = "获取编码列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/type/list")
+    @PreAuthorize("@perm.has('device:view')")
     public List<DeviceType> getDeviceTypeList(){
         return channelService.getDeviceTypeList();
     }
 
     @Operation(summary = "获取编码列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/network/identification/list")
+    @PreAuthorize("@perm.has('device:view')")
     public List<NetworkIdentificationType> getNetworkIdentificationTypeList(){
         return channelService.getNetworkIdentificationTypeList();
     }
 
     @Operation(summary = "更新通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/update")
+    @PreAuthorize("@perm.has('device:edit')")
     public void update(@RequestBody CommonGBChannel channel){
         BeanWrapperImpl wrapper = new BeanWrapperImpl(channel);
         int count = 0;
@@ -108,6 +118,7 @@ public class ChannelController {
 
     @Operation(summary = "重置国标通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/reset")
+    @PreAuthorize("@perm.has('device:edit')")
     public void reset(@RequestBody ResetParam param){
         Assert.notNull(param.getId(), "通道ID不能为空");
         Assert.notEmpty(param.getChanelFields(), "待重置字段不可以空");
@@ -116,6 +127,7 @@ public class ChannelController {
 
     @Operation(summary = "增加通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/add")
+    @PreAuthorize("@perm.has('device:edit')")
     public CommonGBChannel add(@RequestBody CommonGBChannel channel){
         channelService.add(channel);
         return channel;
@@ -131,6 +143,7 @@ public class ChannelController {
     @Parameter(name = "civilCode", description = "行政区划")
     @Parameter(name = "parentDeviceId", description = "父节点编码")
     @GetMapping("/list")
+    @PreAuthorize("@perm.has('device:view')")
     public PageInfo<CommonGBChannel> queryList(int page, int count,
                                                           @RequestParam(required = false) String query,
                                                           @RequestParam(required = false) Boolean online,
@@ -158,6 +171,7 @@ public class ChannelController {
     @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
     @Parameter(name = "civilCode", description = "行政区划")
     @GetMapping("/civilcode/list")
+    @PreAuthorize("@perm.has('device:view')")
     public PageInfo<CommonGBChannel> queryListByCivilCode(int page, int count,
                                                @RequestParam(required = false) String query,
                                                @RequestParam(required = false) Boolean online,
@@ -177,6 +191,7 @@ public class ChannelController {
     @Parameter(name = "online", description = "是否在线")
     @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
     @GetMapping("/civilCode/unusual/list")
+    @PreAuthorize("@perm.has('device:view')")
     public PageInfo<CommonGBChannel> queryListByCivilCodeForUnusual(int page, int count,
                                                           @RequestParam(required = false) String query,
                                                           @RequestParam(required = false) Boolean online,
@@ -195,6 +210,7 @@ public class ChannelController {
     @Parameter(name = "online", description = "是否在线")
     @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
     @GetMapping("/parent/unusual/list")
+    @PreAuthorize("@perm.has('device:view')")
     public PageInfo<CommonGBChannel> queryListByParentForUnusual(int page, int count,
                                                           @RequestParam(required = false) String query,
                                                           @RequestParam(required = false) Boolean online,
@@ -208,6 +224,7 @@ public class ChannelController {
     @Operation(summary = "清除存在行政区划但无法挂载的通道列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "param", description = "清理参数， all为true清理所有异常数据。 否则按照传入的设备Id清理", required = true)
     @PostMapping("/civilCode/unusual/clear")
+    @PreAuthorize("@perm.has('device:edit')")
     public void clearChannelCivilCode(@RequestBody ChannelToRegionParam param){
         channelService.clearChannelCivilCode(param.getAll(), param.getChannelIds());
     }
@@ -215,6 +232,7 @@ public class ChannelController {
     @Operation(summary = "清除存在分组节点但无法挂载的通道列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "param", description = "清理参数， all为true清理所有异常数据。 否则按照传入的设备Id清理", required = true)
     @PostMapping("/parent/unusual/clear")
+    @PreAuthorize("@perm.has('device:edit')")
     public void clearChannelParent(@RequestBody ChannelToRegionParam param){
         channelService.clearChannelParent(param.getAll(), param.getChannelIds());
     }
@@ -227,6 +245,7 @@ public class ChannelController {
     @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
     @Parameter(name = "groupDeviceId", description = "业务分组下的父节点ID")
     @GetMapping("/parent/list")
+    @PreAuthorize("@perm.has('device:view')")
     public PageInfo<CommonGBChannel> queryListByParentId(int page, int count,
                                                @RequestParam(required = false) String query,
                                                @RequestParam(required = false) Boolean online,
@@ -240,6 +259,7 @@ public class ChannelController {
 
     @Operation(summary = "通道设置行政区划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/region/add")
+    @PreAuthorize("@perm.has('device:edit')")
     public void addChannelToRegion(@RequestBody ChannelToRegionParam param){
         Assert.notEmpty(param.getChannelIds(),"通道ID不可为空");
         Assert.hasLength(param.getCivilCode(),"未添加行政区划");
@@ -248,6 +268,7 @@ public class ChannelController {
 
     @Operation(summary = "通道删除行政区划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/region/delete")
+    @PreAuthorize("@perm.has('device:edit')")
     public void deleteChannelToRegion(@RequestBody ChannelToRegionParam param){
         Assert.isTrue(!param.getChannelIds().isEmpty() || !ObjectUtils.isEmpty(param.getCivilCode()),"参数异常");
         channelService.deleteChannelToRegion(param.getCivilCode(), param.getChannelIds());
@@ -255,6 +276,7 @@ public class ChannelController {
 
     @Operation(summary = "通道设置行政区划-根据国标设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/region/device/add")
+    @PreAuthorize("@perm.has('device:edit')")
     public void addChannelToRegionByGbDevice(@RequestBody ChannelToRegionByGbDeviceParam param){
         Assert.notEmpty(param.getDeviceIds(),"参数异常");
         Assert.hasLength(param.getCivilCode(),"未添加行政区划");
@@ -263,6 +285,7 @@ public class ChannelController {
 
     @Operation(summary = "通道删除行政区划-根据国标设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/region/device/delete")
+    @PreAuthorize("@perm.has('device:edit')")
     public void deleteChannelToRegionByGbDevice(@RequestBody ChannelToRegionByGbDeviceParam param){
         Assert.notEmpty(param.getDeviceIds(),"参数异常");
         channelService.deleteChannelToRegionByGbDevice(param.getDeviceIds());
@@ -270,6 +293,7 @@ public class ChannelController {
 
     @Operation(summary = "通道设置业务分组", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/group/add")
+    @PreAuthorize("@perm.has('device:edit')")
     public void addChannelToGroup(@RequestBody ChannelToGroupParam param){
         Assert.notEmpty(param.getChannelIds(),"通道ID不可为空");
         Assert.hasLength(param.getParentId(),"未添加上级分组编号");
@@ -279,6 +303,7 @@ public class ChannelController {
 
     @Operation(summary = "通道删除业务分组", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/group/delete")
+    @PreAuthorize("@perm.has('device:edit')")
     public void deleteChannelToGroup(@RequestBody ChannelToGroupParam param){
         Assert.isTrue(!param.getChannelIds().isEmpty()
                 || (!ObjectUtils.isEmpty(param.getParentId()) && !ObjectUtils.isEmpty(param.getBusinessGroup())),
@@ -288,6 +313,7 @@ public class ChannelController {
 
     @Operation(summary = "通道设置业务分组-根据国标设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/group/device/add")
+    @PreAuthorize("@perm.has('device:edit')")
     public void addChannelToGroupByGbDevice(@RequestBody ChannelToGroupByGbDeviceParam param){
         Assert.notEmpty(param.getDeviceIds(),"参数异常");
         Assert.hasLength(param.getParentId(),"未添加上级分组编号");
@@ -297,6 +323,7 @@ public class ChannelController {
 
     @Operation(summary = "通道删除业务分组-根据国标设备", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/group/device/delete")
+    @PreAuthorize("@perm.has('device:edit')")
     public void deleteChannelToGroupByGbDevice(@RequestBody ChannelToGroupByGbDeviceParam param){
         Assert.notEmpty(param.getDeviceIds(),"参数异常");
         channelService.deleteChannelToGroupByGbDevice(param.getDeviceIds());
@@ -304,10 +331,15 @@ public class ChannelController {
 
     @Operation(summary = "播放通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/play")
+    @PreAuthorize("@perm.has('channel:play')")
     public DeferredResult<WVPResult<StreamContent>> play(HttpServletRequest request,  Integer channelId){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
         Assert.notNull(channel, "通道不存在");
+        // 数据范围校验：受限用户只能播放允许范围内的通道
+        if (!dataScopeService.isChannelAllowed(channelId)) {
+            throw new ControllerException(ErrorCode.ERROR403);
+        }
 
         DeferredResult<WVPResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 
@@ -346,6 +378,7 @@ public class ChannelController {
 
     @Operation(summary = "停止播放通道", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/play/stop")
+    @PreAuthorize("@perm.has('channel:play')")
     public void stopPlay(Integer channelId){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -355,6 +388,7 @@ public class ChannelController {
 
     @Operation(summary = "开始对讲", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/talk/start")
+    @PreAuthorize("@perm.has('channel:broadcast')")
     public AudioTalkResult startTalk(Integer channelId){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -364,6 +398,7 @@ public class ChannelController {
 
     @Operation(summary = "停止对讲", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/talk/stop")
+    @PreAuthorize("@perm.has('channel:broadcast')")
     public void stopTalk(Integer channelId){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -373,6 +408,7 @@ public class ChannelController {
 
     @Operation(summary = "开始喊话", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/broadcast/start")
+    @PreAuthorize("@perm.has('channel:broadcast')")
     public AudioTalkResult startBroadcast(Integer channelId){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -382,6 +418,7 @@ public class ChannelController {
 
     @Operation(summary = "停止喊话", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping("/broadcast/stop")
+    @PreAuthorize("@perm.has('channel:broadcast')")
     public void stopBroadcast(Integer channelId){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -394,6 +431,7 @@ public class ChannelController {
     @Parameter(name = "startTime", description = "开始时间", required = true)
     @Parameter(name = "endTime", description = "结束时间", required = true)
     @GetMapping("/playback/query")
+    @PreAuthorize("@perm.has('channel:record')")
     public DeferredResult<WVPResult<List<CommonRecordInfo>>> queryRecord(Integer channelId, String startTime, String endTime){
 
         DeferredResult<WVPResult<List<CommonRecordInfo>>> result = new DeferredResult<>(Long.valueOf(userSetting.getRecordInfoTimeout()), TimeUnit.MILLISECONDS);
@@ -427,6 +465,7 @@ public class ChannelController {
     @Parameter(name = "startTime", description = "开始时间", required = true)
     @Parameter(name = "endTime", description = "结束时间", required = true)
     @GetMapping("/playback")
+    @PreAuthorize("@perm.has('channel:record')")
     public DeferredResult<WVPResult<StreamContent>> playback(HttpServletRequest request, Integer channelId, String startTime, String endTime){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -473,6 +512,7 @@ public class ChannelController {
     @Parameter(name = "channelId", description = "通道ID", required = true)
     @Parameter(name = "stream", description = "流ID", required = true)
     @GetMapping("/playback/stop")
+    @PreAuthorize("@perm.has('channel:record')")
     public void stopPlayback(Integer channelId, String stream){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -484,6 +524,7 @@ public class ChannelController {
     @Parameter(name = "channelId", description = "通道ID", required = true)
     @Parameter(name = "stream", description = "流ID", required = true)
     @GetMapping("/playback/pause")
+    @PreAuthorize("@perm.has('channel:record')")
     public void pausePlayback(Integer channelId, String stream){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -495,6 +536,7 @@ public class ChannelController {
     @Parameter(name = "channelId", description = "通道ID", required = true)
     @Parameter(name = "stream", description = "流ID", required = true)
     @GetMapping("/playback/resume")
+    @PreAuthorize("@perm.has('channel:record')")
     public void resumePlayback(Integer channelId, String stream){
         Assert.notNull(channelId,"参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -507,6 +549,7 @@ public class ChannelController {
     @Parameter(name = "stream", description = "流ID", required = true)
     @Parameter(name = "seekTime", description = "将要播放的时间", required = true)
     @GetMapping("/playback/seek")
+    @PreAuthorize("@perm.has('channel:record')")
     public void seekPlayback(Integer channelId, String stream, Long seekTime){
         Assert.notNull(channelId,"参数异常");
         Assert.notNull(seekTime,"参数异常");
@@ -520,6 +563,7 @@ public class ChannelController {
     @Parameter(name = "stream", description = "流ID", required = true)
     @Parameter(name = "speed", description = "倍速", required = true)
     @GetMapping("/playback/speed")
+    @PreAuthorize("@perm.has('channel:record')")
     public void seekPlayback(Integer channelId, String stream, Double speed){
         Assert.notNull(channelId,"参数异常");
         Assert.notNull(speed,"参数异常");
@@ -535,6 +579,7 @@ public class ChannelController {
     @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
     @Parameter(name = "geoCoordSys", description = "地理坐标系， WGS84/GCJ02")
     @GetMapping("/map/list")
+    @PreAuthorize("@perm.has('device:view')")
     public List<CommonGBChannel> queryListForMap(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Boolean online,
@@ -548,12 +593,14 @@ public class ChannelController {
 
     @Operation(summary = "为地图去除抽稀结果", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/map/reset-level")
+    @PreAuthorize("@perm.has('device:edit')")
     public void resetLevel(){
         channelService.resetLevel();
     }
 
     @Operation(summary = "执行抽稀", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @PostMapping("/map/thin/draw")
+    @PreAuthorize("@perm.has('device:edit')")
     public String drawThin(@RequestBody DrawThinParam param){
         if(param == null || param.getZoomParam() == null || param.getZoomParam().isEmpty()) {
             throw new ControllerException(ErrorCode.ERROR400);
@@ -564,6 +611,7 @@ public class ChannelController {
     @Operation(summary = "清除未保存的抽稀结果", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "抽稀ID", required = true)
     @GetMapping("/map/thin/clear")
+    @PreAuthorize("@perm.has('device:edit')")
     public void clearThin(String id){
         vectorTileCatch.remove(id);
     }
@@ -571,6 +619,7 @@ public class ChannelController {
     @Operation(summary = "保存的抽稀结果", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "抽稀ID", required = true)
     @GetMapping("/map/thin/save")
+    @PreAuthorize("@perm.has('device:edit')")
     public void saveThin(String id){
         channelService.saveThin(id);
     }
@@ -578,6 +627,7 @@ public class ChannelController {
     @Operation(summary = "获取抽稀执行的进度", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "抽稀ID", required = true)
     @GetMapping("/map/thin/progress")
+    @PreAuthorize("@perm.has('device:view')")
     public DrawThinProcess thinProgress(String id){
         return channelService.thinProgress(id);
     }
@@ -585,6 +635,7 @@ public class ChannelController {
     @Operation(summary = "为地图提供标准mvt图层", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping(value = "/map/tile/{z}/{x}/{y}", produces = "application/x-protobuf")
     @Parameter(name = "geoCoordSys", description = "地理坐标系， WGS84/GCJ02")
+    @PreAuthorize("@perm.has('device:view')")
     public ResponseEntity<byte[]> getTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, String geoCoordSys){
 
         try {
@@ -607,6 +658,7 @@ public class ChannelController {
     @GetMapping(value = "/map/thin/tile/{z}/{x}/{y}", produces = "application/x-protobuf")
     @Parameter(name = "geoCoordSys", description = "地理坐标系， WGS84/GCJ02")
     @Parameter(name = "thinId", description = "抽稀结果ID")
+    @PreAuthorize("@perm.has('device:view')")
     public ResponseEntity<byte[]> getThinTile(@PathVariable int z, @PathVariable int x, @PathVariable int y,
                                               String geoCoordSys, @RequestParam(required = false) String thinId){
 

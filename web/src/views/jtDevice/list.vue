@@ -25,7 +25,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="add">新设备</el-button>
+        <el-button v-permission="'jt:edit'" icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="add">新设备</el-button>
         <el-button icon="el-icon-info" style="margin-right: 1rem;" @click="showInfo()">接入信息</el-button>
       </el-form-item>
       <el-form-item style="float: right;">
@@ -95,9 +95,10 @@
           >通道
           </el-button>
           <el-divider direction="vertical" />
-          <el-button size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">编辑</el-button>
+          <el-button v-permission="'jt:edit'" size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">编辑</el-button>
           <el-divider direction="vertical" />
           <el-button
+            v-permission="'jt:edit'"
             size="medium"
             icon="el-icon-delete"
             type="text"

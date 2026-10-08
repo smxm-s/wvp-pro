@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +42,7 @@ public class LogController {
     @Parameter(name = "query", description = "检索内容", required = false)
     @Parameter(name = "startTime", description = "开始时间(yyyy-MM-dd HH:mm:ss)", required = false)
     @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
+    @PreAuthorize("@perm.has('log:view')")
     public List<LogFileInfo> queryList(@RequestParam(required = false) String query, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime
 
     ) {
@@ -61,6 +63,7 @@ public class LogController {
      */
     @ResponseBody
     @GetMapping("/file/{fileName}")
+    @PreAuthorize("@perm.has('log:view')")
     public void downloadFile(HttpServletResponse response, @PathVariable  String fileName) {
         try {
             File file = logService.getFileByName(fileName);

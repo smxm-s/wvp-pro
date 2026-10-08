@@ -9,6 +9,9 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = ['/login', '/play/share', '/forceChangePassword'] // no redirect whitelist
 
+// 本次应用加载是否已刷新过权限（避免每次路由跳转都请求）
+let permissionLoaded = false
+
 router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
@@ -34,6 +37,26 @@ router.beforeEach(async(to, from, next) => {
       // 使用默认密码登录的用户：仅允许访问强制改密页，其他页面重定向到改密页
       if (store.state.user.defaultPassword && to.path !== '/forceChangePassword') {
         next({ path: '/forceChangePassword' })
+        NProgress.done()
+        return
+      }
+      // 应用加载后刷新一次权限（而不是每次路由跳转都请求）：
+      // 这样管理员调整了角色权限后，用户刷新页面即可生效；请求失败则沿用本地缓存
+      if (!permissionLoaded) {
+        try {
+          await store.dispatch('user/fetchPermission')
+          permissionLoaded = true
+        } catch (e) {
+          // 拉取失败不阻塞导航，沿用本地缓存
+        }
+      }
+      // 路由级权限校验：菜单虽然被隐藏，但直接输入地址也不能进入
+      const requiredPermission = to.matched.reduce((acc, record) => {
+        return (record.meta && record.meta.permission) ? record.meta.permission : acc
+      }, null)
+      if (requiredPermission && !store.getters.superAdmin
+        && !(store.getters.permissions || []).includes(requiredPermission)) {
+        next({ path: '/404' })
         NProgress.done()
         return
       }

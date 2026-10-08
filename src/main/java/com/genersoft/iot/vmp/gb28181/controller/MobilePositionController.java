@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -53,6 +54,7 @@ public class MobilePositionController {
     @Parameter(name = "start", description = "开始时间")
     @Parameter(name = "end", description = "结束时间")
     @GetMapping("/history/{deviceId}")
+    @PreAuthorize("@perm.has('device:view')")
     public List<MobilePosition> positions( Integer channelId,
                                            @RequestParam(required = false) String start,
                                            @RequestParam(required = false) String end) {
@@ -69,6 +71,7 @@ public class MobilePositionController {
     @Operation(summary = "查询通道最新位置", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "channelId", description = "通道的数据库ID", required = true)
     @GetMapping("/latest")
+    @PreAuthorize("@perm.has('device:view')")
     public MobilePosition latestPosition(Integer channelId) {
         return mobilePositionService.queryLatestPosition(channelId);
     }
@@ -81,6 +84,7 @@ public class MobilePositionController {
     @Operation(summary = "获取移动位置信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "deviceId", description = "设备国标编号", required = true)
     @GetMapping("/realtime/{deviceId}")
+    @PreAuthorize("@perm.has('device:view')")
     public DeferredResult<MobilePosition> realTimePosition(@PathVariable String deviceId) {
         Device device = deviceService.getDeviceByDeviceId(deviceId);
         String uuid = UUID.randomUUID().toString();
@@ -123,6 +127,7 @@ public class MobilePositionController {
     @Parameter(name = "expires", description = "订阅超时时间", required = true)
     @Parameter(name = "interval", description = "上报时间间隔", required = true)
     @GetMapping("/subscribe/{deviceId}")
+    @PreAuthorize("@perm.has('device:edit')")
     public void positionSubscribe(@PathVariable String deviceId,
                                                     @RequestParam String expires,
                                                     @RequestParam String interval) {

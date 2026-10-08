@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +50,7 @@ public class PtzController {
 	@Parameter(name = "parameter2", description = "数据二(对应国标文档指令格式中的字节6, 范围0-255)", required = true)
 	@Parameter(name = "combindCode2", description = "组合码二(对应国标文档指令格式中的字节7, 范围0-15)", required = true)
 	@GetMapping("/common/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void frontEndCommand(@PathVariable String deviceId,@PathVariable String channelId,Integer cmdCode, Integer parameter1, Integer parameter2, Integer combindCode2){
 
 		if (log.isDebugEnabled()) {
@@ -80,6 +82,7 @@ public class PtzController {
 	@Parameter(name = "verticalSpeed", description = "垂直速度(0-255)", required = true)
 	@Parameter(name = "zoomSpeed", description = "缩放速度(0-15)", required = true)
 	@GetMapping("/ptz/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void ptz(@PathVariable String deviceId,@PathVariable String channelId, String command, Integer horizonSpeed, Integer verticalSpeed, Integer zoomSpeed){
 
 		if (log.isDebugEnabled()) {
@@ -151,6 +154,7 @@ public class PtzController {
 	@Parameter(name = "command", description = "控制指令,允许值: in, out, stop", required = true)
 	@Parameter(name = "speed", description = "光圈速度(0-255)", required = true)
 	@GetMapping("/fi/iris/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void iris(@PathVariable String deviceId,@PathVariable String channelId, String command, Integer speed){
 
 		if (log.isDebugEnabled()) {
@@ -186,6 +190,7 @@ public class PtzController {
 	@Parameter(name = "command", description = "控制指令,允许值: near, far, stop", required = true)
 	@Parameter(name = "speed", description = "聚焦速度(0-255)", required = true)
 	@GetMapping("/fi/focus/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void focus(@PathVariable String deviceId,@PathVariable String channelId, String command, Integer speed){
 
 		if (log.isDebugEnabled()) {
@@ -219,6 +224,7 @@ public class PtzController {
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@GetMapping("/preset/query/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:play')")
 	public DeferredResult<WVPResult<Object>> queryPreset(@PathVariable String deviceId, @PathVariable String channelId) {
 		if (log.isDebugEnabled()) {
 			log.debug("设备预置位查询API调用");
@@ -242,6 +248,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "presetId", description = "预置位编号(1-255)", required = true)
 	@GetMapping("/preset/add/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void addPreset(@PathVariable String deviceId, @PathVariable String channelId, Integer presetId) {
 		if (presetId == null || presetId < 1 || presetId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为1-255之间的数字");
@@ -254,6 +261,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "presetId", description = "预置位编号(1-255)", required = true)
 	@GetMapping("/preset/call/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void callPreset(@PathVariable String deviceId, @PathVariable String channelId, Integer presetId) {
 		if (presetId == null || presetId < 1 || presetId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为1-255之间的数字");
@@ -266,6 +274,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "presetId", description = "预置位编号(1-255)", required = true)
 	@GetMapping("/preset/delete/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void deletePreset(@PathVariable String deviceId, @PathVariable String channelId, Integer presetId) {
 		if (presetId == null || presetId < 1 || presetId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为1-255之间的数字");
@@ -279,6 +288,7 @@ public class PtzController {
 	@Parameter(name = "cruiseId", description = "巡航组号(0-255)", required = true)
 	@Parameter(name = "presetId", description = "预置位编号(1-255)", required = true)
 	@GetMapping("/cruise/point/add/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void addCruisePoint(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer presetId) {
 		if (presetId == null || cruiseId == null || presetId < 1 || presetId > 255 || cruiseId < 0 || cruiseId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "编号必须为1-255之间的数字");
@@ -292,6 +302,7 @@ public class PtzController {
 	@Parameter(name = "cruiseId", description = "巡航组号(1-255)", required = true)
 	@Parameter(name = "presetId", description = "预置位编号(0-255, 为0时删除整个巡航)", required = true)
 	@GetMapping("/cruise/point/delete/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void deleteCruisePoint(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer presetId) {
 		if (presetId == null || presetId < 0 || presetId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为0-255之间的数字, 为0时删除整个巡航");
@@ -308,6 +319,7 @@ public class PtzController {
 	@Parameter(name = "cruiseId", description = "巡航组号(0-255)", required = true)
 	@Parameter(name = "speed", description = "巡航速度(1-4095)", required = true)
 	@GetMapping("/cruise/speed/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void setCruiseSpeed(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer speed) {
 		if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
@@ -326,6 +338,7 @@ public class PtzController {
 	@Parameter(name = "cruiseId", description = "巡航组号", required = true)
 	@Parameter(name = "time", description = "巡航停留时间(1-4095)", required = true)
 	@GetMapping("/cruise/time/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void setCruiseTime(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer time) {
 		if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
@@ -343,6 +356,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "cruiseId", description = "巡航组号)", required = true)
 	@GetMapping("/cruise/start/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void startCruise(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId) {
 		if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
@@ -355,6 +369,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "cruiseId", description = "巡航组号", required = true)
 	@GetMapping("/cruise/stop/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void stopCruise(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId) {
 		if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
@@ -367,6 +382,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "scanId", description = "扫描组号(0-255)", required = true)
 	@GetMapping("/scan/start/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void startScan(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
 		if (scanId == null || scanId < 0 || scanId > 255 ) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
@@ -379,6 +395,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "scanId", description = "扫描组号(0-255)", required = true)
 	@GetMapping("/scan/stop/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void stopScan(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
 		if (scanId == null || scanId < 0 || scanId > 255 ) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
@@ -391,6 +408,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "scanId", description = "扫描组号(0-255)", required = true)
 	@GetMapping("/scan/set/left/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void setScanLeft(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
 		if (scanId == null || scanId < 0 || scanId > 255 ) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
@@ -403,6 +421,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "scanId", description = "扫描组号(0-255)", required = true)
 	@GetMapping("/scan/set/right/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void setScanRight(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
 		if (scanId == null || scanId < 0 || scanId > 255 ) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
@@ -417,6 +436,7 @@ public class PtzController {
 	@Parameter(name = "scanId", description = "扫描组号(0-255)", required = true)
 	@Parameter(name = "speed", description = "自动扫描速度(1-4095)", required = true)
 	@GetMapping("/scan/set/speed/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void setScanSpeed(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId, Integer speed) {
 		if (scanId == null || scanId < 0 || scanId > 255 ) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
@@ -435,6 +455,7 @@ public class PtzController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "command", description = "控制指令,允许值: on, off", required = true)
 	@GetMapping("/wiper/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void wiper(@PathVariable String deviceId,@PathVariable String channelId, String command){
 
 		if (log.isDebugEnabled()) {
@@ -461,6 +482,7 @@ public class PtzController {
 	@Parameter(name = "command", description = "控制指令,允许值: on, off", required = true)
 	@Parameter(name = "switchId", description = "开关编号", required = true)
 	@GetMapping("/auxiliary/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:ptz')")
 	public void auxiliarySwitch(@PathVariable String deviceId,@PathVariable String channelId, String command, Integer switchId){
 
 		if (log.isDebugEnabled()) {

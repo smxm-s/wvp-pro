@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -70,6 +71,7 @@ public class CloudRecordController {
     @Parameter(name = "year", description = "年，置空则查询当年", required = false)
     @Parameter(name = "month", description = "月，置空则查询当月", required = false)
     @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public List<String> openRtpServer(
             @RequestParam(required = true) String app,
             @RequestParam(required = true) String stream,
@@ -117,6 +119,7 @@ public class CloudRecordController {
     @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
     @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
     @Parameter(name = "ascOrder", description = "是否升序排序， 升序： true， 降序： false", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public PageInfo<CloudRecordItem> openRtpServer(@RequestParam(required = false) String query,
                                                    @RequestParam(required = false) String app,
                                                    @RequestParam(required = false) String stream,
@@ -173,6 +176,7 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "remoteHost", description = "返回地址时的远程地址", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public String addTask(HttpServletRequest request, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost) {
         MediaServer mediaServer;
         if (mediaServerId == null) {
@@ -196,6 +200,7 @@ public class CloudRecordController {
     @Parameter(name = "taskId", description = "任务Id", required = false)
     @Parameter(name = "mediaServerId", description = "流媒体ID", required = false)
     @Parameter(name = "isEnd", description = "是否结束", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public JSONArray queryTaskList(HttpServletRequest request, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String callId, @RequestParam(required = false) String taskId, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) Boolean isEnd) {
         if (ObjectUtils.isEmpty(mediaServerId)) {
             mediaServerId = null;
@@ -214,6 +219,7 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "recordId", description = "录像记录的ID，用于精准收藏一个视频文件", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public int addCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) Integer recordId) {
         log.info("[云端录像] 添加收藏，app={}，stream={},mediaServerId={},startTime={},endTime={},callId={},recordId={}", app, stream, mediaServerId, startTime, endTime, callId, recordId);
         if (recordId != null) {
@@ -233,6 +239,7 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "recordId", description = "录像记录的ID，用于精准精准移除一个视频文件的收藏", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public int deleteCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) Integer recordId) {
         log.info("[云端录像] 移除收藏，app={}，stream={},mediaServerId={},startTime={},endTime={},callId={},recordId={}", app, stream, mediaServerId, startTime, endTime, callId, recordId);
         if (recordId != null) {
@@ -246,6 +253,7 @@ public class CloudRecordController {
     @GetMapping("/play/path")
     @Operation(summary = "获取播放地址")
     @Parameter(name = "recordId", description = "录像记录的ID", required = true)
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public DownloadFileInfo getPlayUrlPath(@RequestParam(required = true) Integer recordId) {
         return cloudRecordService.getPlayUrlPath(recordId);
     }
@@ -256,6 +264,7 @@ public class CloudRecordController {
     @Parameter(name = "app", description = "应用名", required = true)
     @Parameter(name = "stream", description = "流ID", required = true)
     @Parameter(name = "cloudRecordId", description = "云端录像ID", required = true)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public DeferredResult<WVPResult<StreamContent>> loadRecord(
             HttpServletRequest request,
             @RequestParam(required = true) String app,
@@ -317,6 +326,7 @@ public class CloudRecordController {
     @Parameter(name = "app", description = "应用名", required = true)
     @Parameter(name = "stream", description = "流ID", required = true)
     @Parameter(name = "seek", description = "要定位的时间位置，从录像开始的时间算起", required = true)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public void seekRecord(
             @RequestParam(required = true) String mediaServerId,
             @RequestParam(required = true) String app,
@@ -337,6 +347,7 @@ public class CloudRecordController {
     @Parameter(name = "app", description = "应用名", required = true)
     @Parameter(name = "stream", description = "流ID", required = true)
     @Parameter(name = "speed", description = "要设置的录像倍速", required = true)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public void setRecordSpeed(
             @RequestParam(required = true) String mediaServerId,
             @RequestParam(required = true) String app,
@@ -355,12 +366,14 @@ public class CloudRecordController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除录像文件")
     @Parameter(name = "ids", description = "文件ID集合", required = true)
+    @PreAuthorize("@perm.has('cloudRecord:delete')")
     public void deleteFileByIds(@RequestBody BatchRemoveParam ids) {
         cloudRecordService.deleteFileByIds(ids.getIds());
     }
 
     @ResponseBody
     @GetMapping("/download/zip")
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public void downloadZipFileFromUrl(HttpServletResponse response, Integer[] ids) {
         String idsStr = StringUtils.arrayToCommaDelimitedString(ids);
         log.info("[下载指定录像文件的压缩包] 查询 ids->{}", idsStr);
@@ -425,6 +438,7 @@ public class CloudRecordController {
      */
     @ResponseBody
     @GetMapping("/zip")
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public void downloadZipFile(HttpServletResponse response, @RequestParam(required = false) String query, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String callId, @RequestParam(required = false) List<Integer> ids
 
     ) {
@@ -529,6 +543,7 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
     @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
     @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
+    @PreAuthorize("@perm.has('cloudRecord:view')")
     public PageInfo<CloudRecordUrl> getListWithUrl(HttpServletRequest request, @RequestParam(required = false) String query, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam int page, @RequestParam int count, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost
 
     ) {

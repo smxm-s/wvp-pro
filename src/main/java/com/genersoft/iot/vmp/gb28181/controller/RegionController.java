@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ public class RegionController {
     @Parameter(name = "region", description = "Region", required = true)
     @ResponseBody
     @PostMapping("/add")
+    @PreAuthorize("@perm.has('org:edit')")
     public void add(@RequestBody Region region){
         regionService.add(region);
     }
@@ -42,6 +44,7 @@ public class RegionController {
     @Parameter(name = "count", description = "每页查询数量", required = true)
     @ResponseBody
     @GetMapping("/page/list")
+    @PreAuthorize("@perm.has('org:view')")
     public PageInfo<Region> query(
             @RequestParam(required = false) String query,
             @RequestParam(required = true) int page,
@@ -56,6 +59,7 @@ public class RegionController {
     @Parameter(name = "hasChannel", description = "是否查询通道", required = true)
     @ResponseBody
     @GetMapping("/tree/list")
+    @PreAuthorize("@perm.has('org:view')")
     public List<RegionTree> queryForTree(
             @RequestParam(required = false) Integer parent,
             @RequestParam(required = false) Boolean hasChannel
@@ -69,6 +73,7 @@ public class RegionController {
     @Parameter(name = "channel", description = "true为查询通道，false为查询节点", required = true)
     @ResponseBody
     @GetMapping("/tree/query")
+    @PreAuthorize("@perm.has('org:view')")
     public PageInfo<Region> queryTree(Integer page, Integer count,
             @RequestParam(required = true) String query
     ){
@@ -79,6 +84,7 @@ public class RegionController {
     @Parameter(name = "region", description = "Region", required = true)
     @ResponseBody
     @PostMapping("/update")
+    @PreAuthorize("@perm.has('org:edit')")
     public void update(@RequestBody Region region){
         regionService.update(region);
     }
@@ -87,6 +93,7 @@ public class RegionController {
     @Parameter(name = "id", description = "区域ID", required = true)
     @ResponseBody
     @DeleteMapping("/delete")
+    @PreAuthorize("@perm.has('org:edit')")
     public void delete(Integer id){
         Assert.notNull(id, "区域ID需要存在");
         boolean result = regionService.deleteByDeviceId(id);
@@ -99,6 +106,7 @@ public class RegionController {
     @Parameter(name = "regionDeviceId", description = "行政区划节点编号", required = true)
     @ResponseBody
     @GetMapping("/one")
+    @PreAuthorize("@perm.has('org:view')")
     public Region queryRegionByDeviceId(
             @RequestParam(required = true) String regionDeviceId
     ){
@@ -112,6 +120,7 @@ public class RegionController {
     @Parameter(name = "parent", description = "所属的行政区划", required = false)
     @ResponseBody
     @GetMapping("/base/child/list")
+    @PreAuthorize("@perm.has('org:view')")
     public List<Region> getAllChild(@RequestParam(required = false) String parent){
         if (ObjectUtils.isEmpty(parent)) {
             parent = null;
@@ -123,6 +132,7 @@ public class RegionController {
     @Parameter(name = "deviceId", description = "当前的行政区划", required = false)
     @ResponseBody
     @GetMapping("/path")
+    @PreAuthorize("@perm.has('org:view')")
     public List<Region> getPath(String deviceId){
         return regionService.getPath(deviceId);
     }
@@ -130,6 +140,7 @@ public class RegionController {
     @Operation(summary = "从通道中同步行政区划")
     @ResponseBody
     @GetMapping("/sync")
+    @PreAuthorize("@perm.has('org:edit')")
     public void sync(){
         regionService.syncFromChannel();
     }
@@ -137,6 +148,7 @@ public class RegionController {
     @Operation(summary = "根据行政区划编号从文件中查询层级和描述")
     @ResponseBody
     @GetMapping("/description")
+    @PreAuthorize("@perm.has('org:view')")
     public String getDescription(String civilCode){
         return regionService.getDescription(civilCode);
     }
@@ -144,6 +156,7 @@ public class RegionController {
     @Operation(summary = "根据行政区划编号从文件中查询层级并添加")
     @ResponseBody
     @GetMapping("/addByCivilCode")
+    @PreAuthorize("@perm.has('org:edit')")
     public void addByCivilCode(String civilCode){
         regionService.addByCivilCode(civilCode);
     }

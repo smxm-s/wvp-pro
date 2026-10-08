@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -62,6 +63,7 @@ public class JT1078Controller {
     @Parameter(name = "channelId", description = "通道编号, 一般为从1开始的数字", required = true)
     @Parameter(name = "type", description = "类型：0:音视频,1:视频,3:音频", required = true)
     @GetMapping("/live/start")
+    @PreAuthorize("@perm.has('jt:edit')")
     public DeferredResult<WVPResult<StreamContent>> startLive(HttpServletRequest request,
                                                               @Parameter(required = true) String phoneNumber,
                                                               @Parameter(required = true) Integer channelId,
@@ -112,6 +114,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/live/stop")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void stopLive(HttpServletRequest request,
                                                               @Parameter(required = true) String phoneNumber,
                                                               @Parameter(required = true) Integer channelId) {
@@ -122,6 +125,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/talk/start")
+    @PreAuthorize("@perm.has('jt:edit')")
     public StreamContent startTalk(HttpServletRequest request,
                          @Parameter(required = true) String phoneNumber,
                          @Parameter(required = true) Integer channelId) {
@@ -145,6 +149,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/talk/stop")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void stopTalk(HttpServletRequest request,
                          @Parameter(required = true) String phoneNumber,
                          @Parameter(required = true) Integer channelId) {
@@ -156,6 +161,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/live/pause")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void pauseLive(HttpServletRequest request,
                          @Parameter(required = true) String phoneNumber,
                          @Parameter(required = true) Integer channelId) {
@@ -166,6 +172,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/live/continue")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void continueLive(HttpServletRequest request,
                           @Parameter(required = true) String phoneNumber,
                           @Parameter(required = true) Integer channelId) {
@@ -178,6 +185,7 @@ public class JT1078Controller {
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @Parameter(name = "streamType", description = "0:主码流; 1:子码流", required = true)
     @GetMapping("/live/switch")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void changeStreamType(HttpServletRequest request,
                              @Parameter(required = true) String phoneNumber,
                              @Parameter(required = true) Integer channelId,
@@ -191,6 +199,7 @@ public class JT1078Controller {
     @Parameter(name = "startTime", description = "开始时间,格式： yyyy-MM-dd HH:mm:ss", required = true)
     @Parameter(name = "endTime", description = "结束时间,格式： yyyy-MM-dd HH:mm:ss", required = true)
     @GetMapping("/record/list")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<List<J1205.JRecordItem>> playbackList(HttpServletRequest request,
                                                                      @Parameter(required = true) String phoneNumber,
                                                                      @Parameter(required = true) Integer channelId,
@@ -214,6 +223,7 @@ public class JT1078Controller {
     @Parameter(name = "playbackType", description = "0.正常回放 1.快进回放 2.关键帧快退回放 3.关键帧播放 4.单帧上传", required = true)
     @Parameter(name = "playbackSpeed", description = "0.无效 1.1倍 2.2倍 3.4倍 4.8倍 5.16倍 (回放控制为1和2时,此字段内容有效,否则置0)", required = true)
     @GetMapping("/playback/start")
+    @PreAuthorize("@perm.has('jt:edit')")
     public DeferredResult<WVPResult<StreamContent>> recordLive(HttpServletRequest request,
                                                               @Parameter(required = true) String phoneNumber,
                                                               @Parameter(required = true) Integer channelId,
@@ -269,6 +279,7 @@ public class JT1078Controller {
     @Parameter(name = "playbackSpeed", description = "0.无效 1.1倍 2.2倍 3.4倍 4.8倍 5.16倍 (回放控制为3和4时,此字段内容有效,否则置0)", required = false)
     @Parameter(name = "time", description = "拖动回放位置(时间)", required = false)
     @GetMapping("/playback/control")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void recordControl(@Parameter(required = true) String phoneNumber,
                               @Parameter(required = true) Integer channelId,
                               @Parameter(required = false) Integer command,
@@ -283,6 +294,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/playback/stop")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void stopPlayback(HttpServletRequest request,
                          @Parameter(required = true) String phoneNumber,
                          @Parameter(required = true) Integer channelId) {
@@ -299,6 +311,7 @@ public class JT1078Controller {
     @Parameter(name = "streamType", description = "码流类型：0.所有码流 1.主码流 2.子码流(如果此通道只传输音频,此字段置0)", required = true)
     @Parameter(name = "storageType", description = "存储器类型", required = true)
     @GetMapping("/playback/downloadUrl")
+    @PreAuthorize("@perm.has('jt:view')")
     public String getRecordTempUrl(HttpServletRequest request,
                                    @Parameter(required = true) String phoneNumber,
                                    @Parameter(required = true) Integer channelId,
@@ -321,6 +334,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-录像-下载", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "path", description = "临时下载路径", required = true)
     @GetMapping("/playback/download")
+    @PreAuthorize("@perm.has('jt:view')")
     public void download(HttpServletRequest request, HttpServletResponse response, @Parameter(required = true) String path) throws IOException {
         if (!ftpSetting.getEnable()) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "未启用ftp服务，无法下载录像");
@@ -340,6 +354,7 @@ public class JT1078Controller {
     @Parameter(name = "command", description = "控制指令,允许值: left, right, up, down, zoomin, zoomout, irisin, irisout, focusnear, focusfar, stop", required = true)
     @Parameter(name = "speed", description = "速度(0-255)， command,值 left, right, up, down时有效", required = true)
     @GetMapping("/ptz")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void ptz(String phoneNumber, Integer channelId, String command, int speed){
 
         log.info("[JT-云台控制] phoneNumber：{}, channelId：{}, command: {}, speed: {}", phoneNumber, channelId, command, speed);
@@ -351,6 +366,7 @@ public class JT1078Controller {
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @Parameter(name = "command", description = "控制指令,允许值: on off", required = true)
     @GetMapping("/fill-light")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void fillLight(String phoneNumber, Integer channelId, String command){
 
         log.info("[JT-补光灯开关] phoneNumber：{}, channelId：{}, command: {}", phoneNumber, channelId, command);
@@ -362,6 +378,7 @@ public class JT1078Controller {
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @Parameter(name = "command", description = "控制指令,允许值: on off", required = true)
     @GetMapping("/wiper")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void wiper(String phoneNumber, Integer channelId, String command){
 
         log.info("[JT-雨刷开关] phoneNumber：{}, channelId：{}, command: {}", phoneNumber, channelId, command);
@@ -371,6 +388,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询终端参数", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @GetMapping("/config/get")
+    @PreAuthorize("@perm.has('jt:view')")
     public JTDeviceConfig config(String phoneNumber, String[] params){
 
         log.info("[JT-查询终端参数] phoneNumber：{}", phoneNumber);
@@ -381,6 +399,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "config", description = "终端参数", required = true)
     @PostMapping("/config/set")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void setConfig(@RequestBody SetConfigParam config){
 
         log.info("[JT-设置终端参数] 参数: {}", config.toString());
@@ -390,6 +409,7 @@ public class JT1078Controller {
     @Operation(summary = "终端控制-连接指定的服务器", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "control", description = "终端控制参数", required = true)
     @PostMapping("/control/connection")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void connectionControl(@RequestBody ConnectionControlParam control){
 
         log.info("[JT-终端控制] 参数: {}", control.toString());
@@ -399,6 +419,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-终端控制-复位", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @PostMapping("/control/reset")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void resetControl(String phoneNumber){
 
         log.info("[JT-复位] phoneNumber: {}", phoneNumber);
@@ -408,6 +429,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-终端控制-恢复出厂设置", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @PostMapping("/control/factory-reset")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void factoryResetControl(String phoneNumber){
 
         log.info("[JT-恢复出厂设置] phoneNumber: {}", phoneNumber);
@@ -417,6 +439,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询终端属性", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/attribute")
+    @PreAuthorize("@perm.has('jt:view')")
     public JTDeviceAttribute attribute(String phoneNumber){
 
         log.info("[JT-查询终端属性] phoneNumber: {}", phoneNumber);
@@ -426,6 +449,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询位置信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/position-info")
+    @PreAuthorize("@perm.has('jt:view')")
     public JTPositionBaseInfo queryPositionInfo(String phoneNumber){
 
         log.info("[JT-查询位置信息] phoneNumber: {}", phoneNumber);
@@ -437,6 +461,7 @@ public class JT1078Controller {
     @Parameter(name = "timeInterval", description = "时间间隔,单位为秒,时间间隔为0 时停止跟踪,停止跟踪无需带后继字段", required = true)
     @Parameter(name = "validityPeriod", description = "位置跟踪有效期, 单位为秒,终端在接收到位置跟踪控制消息后,在有效期截止时间之前依据消息中的时间间隔发送位置汇报", required = true)
     @GetMapping("/control/temp-position-tracking")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void tempPositionTrackingControl(String phoneNumber, Integer timeInterval, Long validityPeriod){
 
         log.info("[JT-临时位置跟踪控制] phoneNumber: {}, 时间间隔 {}秒, 位置跟踪有效期 {}秒", phoneNumber, timeInterval, validityPeriod);
@@ -448,6 +473,7 @@ public class JT1078Controller {
     @Parameter(name = "timeInterval", description = "时间间隔,单位为秒,时间间隔为0 时停止跟踪,停止跟踪无需带后继字段", required = true)
     @Parameter(name = "validityPeriod", description = "位置跟踪有效期, 单位为秒,终端在接收到位置跟踪控制消息后,在有效期截止时间之前依据消息中的时间间隔发送位置汇报", required = true)
     @PostMapping("/confirmation-alarm-message")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void confirmationAlarmMessage(@RequestBody ConfirmationAlarmMessageParam param){
 
         log.info("[JT-人工确认报警消息] 参数: {}", param);
@@ -457,6 +483,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-链路检测", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/link-detection")
+    @PreAuthorize("@perm.has('jt:edit')")
     public Integer linkDetection(String phoneNumber){
 
         log.info("[JT-链路检测] phoneNumber: {}", phoneNumber);
@@ -466,6 +493,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-文本信息下发", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "textMessageParam", description = "文本信息下发参数", required = true)
     @PostMapping("/text-msg")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> textMessage(@RequestBody TextMessageParam textMessageParam){
 
         log.info("[JT-文本信息下发] textMessageParam: {}", textMessageParam);
@@ -484,6 +512,7 @@ public class JT1078Controller {
     @Parameter(name = "sign", description = "标志: 0:普通通话,1:监听", required = true)
     @Parameter(name = "destPhoneNumber", description = "回拨电话号码", required = true)
     @GetMapping("/telephone-callback")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> telephoneCallback(String phoneNumber, Integer sign, String destPhoneNumber){
 
         log.info("[JT-电话回拨] phoneNumber: {}, sign: {}, phoneNumber: {},", phoneNumber, sign, phoneNumber);
@@ -500,6 +529,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-设置电话本", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "setPhoneBookParam", description = "设置电话本参数", required = true)
     @PostMapping("/set-phone-book")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> setPhoneBook(@RequestBody SetPhoneBookParam setPhoneBookParam){
 
         log.info("[JT-设置电话本] setPhoneBookParam: {}", setPhoneBookParam);
@@ -517,6 +547,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "open", description = "开启车门", required = true)
     @GetMapping("/control/door")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> controlDoor(String phoneNumber, Boolean open){
 
         log.info("[JT-车门控制] phoneNumber: {}, open: {},", phoneNumber, open);
@@ -534,6 +565,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-更新圆形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/circle/update")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> updateAreaForCircle(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-更新圆形区域] areaParam: {},", areaParam);
@@ -550,6 +582,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-追加圆形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/circle/add")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> addAreaForCircle(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-追加圆形区域] areaParam: {},", areaParam);
@@ -566,6 +599,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-修改圆形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/circle/edit")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> editAreaForCircle(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-修改圆形区域] areaParam: {},", areaParam);
@@ -583,6 +617,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "ids", description = "待删除圆形区域的id，例如1,2,3", required = true)
     @GetMapping("/area/circle/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> deleteAreaForCircle(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-删除圆形区域] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -599,6 +634,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询圆形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/area/circle/query")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<List<JTAreaOrRoute>> queryAreaForCircle(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-查询圆形区域] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -614,6 +650,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-更新矩形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/rectangle/update")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> updateAreaForRectangle(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-更新矩形区域] areaParam: {},", areaParam);
@@ -630,6 +667,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-追加矩形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/rectangle/add")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> addAreaForRectangle(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-追加矩形区域] areaParam: {},", areaParam);
@@ -646,6 +684,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-修改矩形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/rectangle/edit")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> editAreaForRectangle(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-修改矩形区域] areaParam: {},", areaParam);
@@ -663,6 +702,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "ids", description = "待删除圆形区域的id，例如1,2,3", required = true)
     @GetMapping("/area/rectangle/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> deleteAreaForRectangle(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-删除矩形区域] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -679,6 +719,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询矩形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/area/rectangle/query")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<List<JTAreaOrRoute>> queryAreaForRectangle(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-查询矩形区域] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -693,6 +734,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-设置多边形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/area/polygon/set")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> setAreaForPolygon(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-设置多边形区域] areaParam: {},", areaParam);
@@ -710,6 +752,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "ids", description = "待删除圆形区域的id，例如1,2,3", required = true)
     @GetMapping("/area/polygon/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> deleteAreaForPolygon(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-删除多边形区域] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -726,6 +769,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询多边形区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/area/polygon/query")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<List<JTAreaOrRoute>> queryAreaForPolygon(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-查询多边形区域] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -740,6 +784,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-设置路线", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "areaParam", description = "设置区域参数", required = true)
     @PostMapping("/route/set")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> setRoute(@RequestBody SetAreaParam areaParam){
 
         log.info("[JT-设置路线] areaParam: {},", areaParam);
@@ -757,6 +802,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "ids", description = "待删除圆形区域的id，例如1,2,3", required = true)
     @GetMapping("/route/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<Integer> deleteRoute(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-删除路线] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -773,6 +819,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询路线", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/route/query")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<List<JTAreaOrRoute>> queryRoute(String phoneNumber, @RequestParam(value = "ids", required = false) List<Long> ids){
 
         log.info("[JT-查询路线] phoneNumber: {}, ids:{}", phoneNumber, ids);
@@ -789,6 +836,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-上报驾驶员身份信息请求", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/driver-information")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<JTDriverInformation> queryDriverInformation(String phoneNumber){
 
         log.info("[JT-上报驾驶员身份信息请求] phoneNumber: {}", phoneNumber);
@@ -803,6 +851,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-摄像头立即拍摄命令", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @PostMapping("/shooting")
+    @PreAuthorize("@perm.has('jt:edit')")
     public WVPResult<List<Long>> shooting(@RequestBody ShootingParam param){
 
         log.info("[JT-摄像头立即拍摄命令] param: {}", param );
@@ -818,6 +867,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "channelId", description = "通道编号", required = true)
     @GetMapping("/snap")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void snap(HttpServletResponse response, String phoneNumber, Integer channelId){
 
         log.info("[JT-抓图] 设备编号: {}, 通道编号: {}", phoneNumber, channelId );
@@ -837,6 +887,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-存储多媒体数据检索", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "param", description = "存储多媒体数据参数", required = true)
     @PostMapping("/media/list")
+    @PreAuthorize("@perm.has('jt:view')")
     public WVPResult<List<JTMediaDataInfo>> queryMediaData(@RequestBody QueryMediaDataParam param){
 
         log.info("[JT-存储多媒体数据检索] param: {}", param );
@@ -852,6 +903,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "mediaId", description = "多媒体ID", required = true)
     @GetMapping("/media/upload/one/upload")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void uploadOneMedia(HttpServletResponse response, String phoneNumber, Long mediaId){
 
         log.info("[JT-单条存储多媒体数据上传] 设备编号: {}, 多媒体ID: {}", phoneNumber, mediaId );
@@ -869,6 +921,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @Parameter(name = "mediaId", description = "多媒体ID", required = true)
     @GetMapping("/media/upload/one/delete")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void deleteOneMedia(HttpServletResponse response, String phoneNumber, Long mediaId){
 
         log.info("[JT-单条存储多媒体数据上传] 设备编号: {}, 多媒体ID: {}", phoneNumber, mediaId );
@@ -954,6 +1007,7 @@ public class JT1078Controller {
     @Parameter(name = "save", description = "0:实时上传；1:保存", required = false)
     @Parameter(name = "samplingRate", description = "音频采样率， 0:8K；1:11K；2:23K；3:32K", required = false)
     @GetMapping("/record/start")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void startRecord(HttpServletRequest request,
                          @Parameter(required = true) String phoneNumber,
                          @Parameter(required = false) Integer time,
@@ -978,6 +1032,7 @@ public class JT1078Controller {
     @Parameter(name = "save", description = "0:实时上传；1:保存", required = false)
     @Parameter(name = "samplingRate", description = "音频采样率， 0:8K；1:11K；2:23K；3:32K", required = false)
     @GetMapping("/record/stop")
+    @PreAuthorize("@perm.has('jt:edit')")
     public void stopRecord(HttpServletRequest request,
                             @Parameter(required = true) String phoneNumber,
                             @Parameter(required = false) Integer time,
@@ -999,6 +1054,7 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询终端音视频属性", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @GetMapping("/media/attribute")
+    @PreAuthorize("@perm.has('jt:view')")
     public JTMediaAttribute queryMediaAttribute( @Parameter(required = true) String phoneNumber
     ) {
         return service.queryMediaAttribute(phoneNumber);

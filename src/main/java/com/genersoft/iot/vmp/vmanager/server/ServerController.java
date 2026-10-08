@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.ObjectUtils;
@@ -98,6 +99,7 @@ public class ServerController {
     @GetMapping(value = "/media_server/list")
     @ResponseBody
     @Operation(summary = "流媒体服务列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public List<MediaServer> getMediaServerList() {
         return mediaServerService.getAll();
     }
@@ -105,6 +107,7 @@ public class ServerController {
     @GetMapping(value = "/media_server/online/list")
     @ResponseBody
     @Operation(summary = "在线流媒体服务列表", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public List<MediaServer> getOnlineMediaServerList() {
         return mediaServerService.getAllOnline();
     }
@@ -113,6 +116,7 @@ public class ServerController {
     @ResponseBody
     @Operation(summary = "停止视频回放", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "流媒体服务ID", required = true)
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public MediaServer getMediaServer(@PathVariable String id) {
         return mediaServerService.getOne(id);
     }
@@ -123,6 +127,7 @@ public class ServerController {
     @Parameter(name = "secret", description = "流媒体服务secret", required = true)
     @GetMapping(value = "/media_server/check")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:edit')")
     public MediaServer checkMediaServer(@RequestParam String ip, @RequestParam int port, @RequestParam String secret, @RequestParam String type) {
         return mediaServerService.checkMediaServer(ip, port, secret, type);
     }
@@ -132,6 +137,7 @@ public class ServerController {
     @Parameter(name = "port", description = "流媒体服务HTT端口", required = true)
     @GetMapping(value = "/media_server/record/check")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:edit')")
     public void checkMediaRecordServer(@RequestParam String ip, @RequestParam int port) {
         boolean checkResult = mediaServerService.checkMediaRecordServer(ip, port);
         if (!checkResult) {
@@ -143,6 +149,7 @@ public class ServerController {
     @Parameter(name = "mediaServerItem", description = "流媒体信息", required = true)
     @PostMapping(value = "/media_server/save")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:edit')")
     public void saveMediaServer(@RequestBody MediaServer mediaServer) {
         MediaServer mediaServerItemInDatabase = mediaServerService.getOneFromDatabase(mediaServer.getId());
 
@@ -161,6 +168,7 @@ public class ServerController {
     @Parameter(name = "id", description = "流媒体ID", required = true)
     @DeleteMapping(value = "/media_server/delete")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:edit')")
     public void deleteMediaServer(@RequestParam String id) {
         MediaServer mediaServer = mediaServerService.getOne(id);
         if (mediaServer == null) {
@@ -175,6 +183,7 @@ public class ServerController {
     @Parameter(name = "mediaServerId", description = "流媒体ID", required = true)
     @GetMapping(value = "/media_server/media_info")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public MediaInfo getMediaInfo(String app, String stream, String mediaServerId) {
         MediaServer mediaServer = mediaServerService.getOneFromCluster(mediaServerId);
         if (mediaServer == null) {
@@ -187,6 +196,7 @@ public class ServerController {
     @Operation(summary = "关闭服务", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping(value = "/shutdown")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:edit')")
     public void shutdown() {
         log.info("正在关闭服务。。。");
         System.exit(1);
@@ -195,6 +205,7 @@ public class ServerController {
     @Operation(summary = "获取系统配置信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping(value = "/system/configInfo")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public SystemConfigInfo getConfigInfo() {
         SystemConfigInfo systemConfigInfo = new SystemConfigInfo();
         systemConfigInfo.setVersion(versionInfo.getVersion());
@@ -208,6 +219,7 @@ public class ServerController {
     @Operation(summary = "获取版本信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @GetMapping(value = "/version")
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public VersionPo VersionPogetVersion() {
         return versionInfo.getVersion();
     }
@@ -216,6 +228,7 @@ public class ServerController {
     @Operation(summary = "获取配置信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "type", description = "配置类型（sip, base）", required = true)
     @ResponseBody
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public JSONObject getVersion(String type) {
 
         JSONObject jsonObject = new JSONObject();
@@ -241,6 +254,7 @@ public class ServerController {
     @GetMapping(value = "/system/info")
     @ResponseBody
     @Operation(summary = "获取系统信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public SystemAllInfo getSystemInfo() {
         SystemAllInfo systemAllInfo = redisCatchStorage.getSystemInfo();
 
@@ -250,6 +264,7 @@ public class ServerController {
     @GetMapping(value = "/media_server/load")
     @ResponseBody
     @Operation(summary = "获取负载信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public List<MediaServerLoad> getMediaLoad() {
         List<MediaServerLoad> result = new ArrayList<>();
         List<MediaServer> allOnline = mediaServerService.getAllOnline();
@@ -266,6 +281,7 @@ public class ServerController {
     @GetMapping(value = "/resource/info")
     @ResponseBody
     @Operation(summary = "获取负载信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public ResourceInfo getResourceInfo() {
         ResourceInfo result = new ResourceInfo();
         ResourceBaseInfo deviceInfo = deviceService.getOverview();
@@ -283,6 +299,7 @@ public class ServerController {
     @GetMapping(value = "/info")
     @ResponseBody
     @Operation(summary = "获取系统信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public Map<String, Map<String, String>> getInfo(HttpServletRequest request) {
         Map<String, Map<String, String>> result = new LinkedHashMap<>();
         Map<String, String> hardwareMap = new LinkedHashMap<>();
@@ -365,6 +382,7 @@ public class ServerController {
     @GetMapping(value = "/map/config")
     @ResponseBody
     @Operation(summary = "获取地图配置", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public List<MapConfig> getMapConfig() {
         if (mapService == null) {
             return Collections.emptyList();
@@ -375,6 +393,7 @@ public class ServerController {
     @GetMapping(value = "/map/model-icon/list")
     @ResponseBody
     @Operation(summary = "获取地图配置图标", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('mediaServer:view')")
     public List<MapModelIcon> getMapModelIconList() {
         if (mapService == null) {
             return Collections.emptyList();

@@ -3,8 +3,11 @@
     <div style="height: calc(100vh - 124px);">
       <el-form :inline="true" size="mini">
         <el-form-item>
-          <el-button icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="addUser">
+          <el-button v-permission="'user:edit'" icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="addUser">
             添加用户
+          </el-button>
+          <el-button v-permission="'user:view'" icon="el-icon-s-custom" size="mini" style="margin-right: 1rem;" @click="showRoleManager">
+            角色管理
           </el-button>
         </el-form-item>
         <el-form-item style="float: right;">
@@ -51,13 +54,16 @@
           </template>
         </el-table-column>
         <el-table-column prop="role.name" label="类型" min-width="160" />
-        <el-table-column label="操作" min-width="450" fixed="right">
+        <el-table-column label="操作" min-width="520" fixed="right">
           <template v-slot:default="scope">
-            <el-button size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">修改密码</el-button>
+            <el-button v-permission="'user:edit'" size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">修改密码</el-button>
             <el-divider direction="vertical" />
             <el-button size="medium" icon="el-icon-edit" type="text" @click="showUserApiKeyManager(scope.row)">管理ApiKey</el-button>
             <el-divider direction="vertical" />
+            <el-button v-permission="'user:edit'" size="medium" icon="el-icon-map-location" type="text" @click="showUserRegionManager(scope.row)">负责区域</el-button>
+            <el-divider direction="vertical" />
             <el-button
+              v-permission="'user:edit'"
               size="medium"
               icon="el-icon-delete"
               type="text"
@@ -82,6 +88,8 @@
     <changePasswordForAdmin ref="changePasswordForAdmin" />
     <addUser ref="addUser" />
     <apiKeyManager ref="apiKeyManager" />
+    <roleManager ref="roleManager" />
+    <userRegion ref="userRegion" />
   </div>
 </template>
 
@@ -89,13 +97,17 @@
 import changePasswordForAdmin from './dialog/changePasswordForAdmin.vue'
 import addUser from './dialog/addUser.vue'
 import apiKeyManager from './apiKeyManager.vue'
+import roleManager from './role.vue'
+import userRegion from './dialog/userRegion.vue'
 
 export default {
   name: 'User',
   components: {
     changePasswordForAdmin,
     addUser,
-    apiKeyManager
+    apiKeyManager,
+    roleManager,
+    userRegion
   },
   data() {
     return {
@@ -195,6 +207,12 @@ export default {
     },
     showUserApiKeyManager: function(row) {
       this.$refs.apiKeyManager.openDialog(row.id)
+    },
+    showUserRegionManager: function(row) {
+      this.$refs.userRegion.openDialog(row)
+    },
+    showRoleManager: function() {
+      this.$refs.roleManager.openDialog()
     },
     startEdit: function(row) {
       if (!row.pushKey) {

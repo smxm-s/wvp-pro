@@ -5,6 +5,7 @@ import com.genersoft.iot.vmp.common.VideoManagerConstants;
 import com.genersoft.iot.vmp.common.enums.ChannelDataType;
 import com.genersoft.iot.vmp.conf.DynamicTask;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
+import com.genersoft.iot.vmp.conf.security.DataScopeService;
 import com.genersoft.iot.vmp.gb28181.bean.*;
 import com.genersoft.iot.vmp.gb28181.controller.bean.Extent;
 import com.genersoft.iot.vmp.gb28181.dao.CommonGBChannelMapper;
@@ -66,6 +67,9 @@ public class GbChannelServiceImpl implements IGbChannelService {
 
     @Autowired
     private RegionMapper regionMapper;
+
+    @Autowired
+    private DataScopeService dataScopeService;
 
     @Autowired
     private GroupMapper groupMapper;
@@ -477,7 +481,7 @@ public class GbChannelServiceImpl implements IGbChannelService {
                     .replaceAll("%", "/%")
                     .replaceAll("_", "/_");
         }
-        List<CommonGBChannel> all = commonGBChannelMapper.queryListByCivilCode(query, online, channelType, civilCode);
+        List<CommonGBChannel> all = commonGBChannelMapper.queryListByCivilCode(query, online, channelType, civilCode, getAllowedCivilCodesList());
         return new PageInfo<>(all);
     }
 
@@ -489,7 +493,7 @@ public class GbChannelServiceImpl implements IGbChannelService {
                     .replaceAll("%", "/%")
                     .replaceAll("_", "/_");
         }
-        List<CommonGBChannel> all = commonGBChannelMapper.queryListByParentId(query, online, channelType, groupDeviceId);
+        List<CommonGBChannel> all = commonGBChannelMapper.queryListByParentId(query, online, channelType, groupDeviceId, getAllowedCivilCodesList());
         return new PageInfo<>(all);
     }
 
@@ -809,7 +813,7 @@ public class GbChannelServiceImpl implements IGbChannelService {
                     .replaceAll("%", "/%")
                     .replaceAll("_", "/_");
         }
-        List<CommonGBChannel> all = commonGBChannelMapper.queryList(query, online,  hasRecordPlan, channelType, civilCode, parentDeviceId);
+        List<CommonGBChannel> all = commonGBChannelMapper.queryList(query, online,  hasRecordPlan, channelType, civilCode, parentDeviceId, getAllowedCivilCodesList());
         return new PageInfo<>(all);
     }
 
@@ -901,6 +905,17 @@ public class GbChannelServiceImpl implements IGbChannelService {
         }
     }
 
+    /**
+     * 获取当前登录用户允许访问的行政区划编码列表，null 表示不受限（不做过滤）。
+     */
+    private List<String> getAllowedCivilCodesList() {
+        Set<String> allowedCivilCodes = dataScopeService.getAllowedCivilCodes();
+        if (allowedCivilCodes == null) {
+            return null;
+        }
+        return new ArrayList<>(allowedCivilCodes);
+    }
+
     @Override
     public List<CommonGBChannel> queryListForMap(String query, Boolean online, Boolean hasRecordPlan, Integer channelType) {
         if (query != null) {
@@ -908,7 +923,7 @@ public class GbChannelServiceImpl implements IGbChannelService {
                     .replaceAll("%", "/%")
                     .replaceAll("_", "/_");
         }
-        return commonGBChannelMapper.queryList(query, online,  hasRecordPlan, channelType, null, null);
+        return commonGBChannelMapper.queryList(query, online,  hasRecordPlan, channelType, null, null, null);
     }
 
     @Override

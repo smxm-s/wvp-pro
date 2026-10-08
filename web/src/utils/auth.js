@@ -4,6 +4,7 @@ const TokenKey = 'wvp_token'
 const NameKey = 'wvp_username'
 const serverIdKey = 'wvp_server_id'
 const defaultPasswordKey = 'wvp_default_password'
+const PermissionKey = 'wvp_permission'
 const expires = 30
 
 export function getToken() {
@@ -53,4 +54,24 @@ export function setDefaultPassword(defaultPassword) {
 
 export function removeDefaultPassword() {
   return Cookies.remove(defaultPasswordKey)
+}
+
+export function getPermission() {
+  const permission = localStorage.getItem(PermissionKey)
+  if (!permission) {
+    return null
+  }
+  try {
+    return JSON.parse(permission)
+  } catch (e) {
+    return null
+  }
+}
+
+export function setPermission(permission) {
+  return localStorage.setItem(PermissionKey, JSON.stringify(permission || {}))
+}
+
+export function removePermission() {
+  return localStorage.removeItem(PermissionKey)
 }

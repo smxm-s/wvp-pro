@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +64,7 @@ public class StreamProxyController {
     @Parameter(name = "mediaServerId", description = "流媒体ID")
     @GetMapping(value = "/list")
     @ResponseBody
+    @PreAuthorize("@perm.has('proxy:view')")
     public PageInfo<StreamProxy> list(@RequestParam(required = false)Integer page,
                                       @RequestParam(required = false)Integer count,
                                       @RequestParam(required = false)String query,
@@ -83,6 +85,7 @@ public class StreamProxyController {
     @Parameter(name = "stream", description = "流Id")
     @GetMapping(value = "/one")
     @ResponseBody
+    @PreAuthorize("@perm.has('proxy:view')")
     public StreamProxy one(String app, String stream){
 
         return streamProxyService.getStreamProxyByAppAndStream(app, stream);
@@ -93,6 +96,7 @@ public class StreamProxyController {
     })
     @PostMapping(value = "/add")
     @ResponseBody
+    @PreAuthorize("@perm.has('proxy:edit')")
     public StreamProxy add(@RequestBody StreamProxy param){
         log.info("添加代理： " + JSONObject.toJSONString(param));
         if (ObjectUtils.isEmpty(param.getRelatesMediaServerId())) {
@@ -114,6 +118,7 @@ public class StreamProxyController {
     })
     @PostMapping(value = "/update")
     @ResponseBody
+    @PreAuthorize("@perm.has('proxy:edit')")
     public StreamProxy update(@RequestBody StreamProxy param){
         log.info("更新代理： " + JSONObject.toJSONString(param));
         if (param.getId() == 0) {
@@ -133,6 +138,7 @@ public class StreamProxyController {
     @ResponseBody
     @Operation(summary = "获取ffmpeg.cmd模板", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "mediaServerId", description = "流媒体ID", required = true)
+    @PreAuthorize("@perm.has('proxy:view')")
     public Map<String, String> getFFmpegCMDs(@RequestParam String mediaServerId){
         log.debug("获取节点[ {} ]ffmpeg.cmd模板", mediaServerId );
 
@@ -148,6 +154,7 @@ public class StreamProxyController {
     @Operation(summary = "移除代理", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "app", description = "应用名", required = true)
     @Parameter(name = "stream", description = "流id", required = true)
+    @PreAuthorize("@perm.has('proxy:edit')")
     public void del(@RequestParam String app, @RequestParam String stream){
         log.info("移除代理： " + app + "/" + stream);
         if (app == null || stream == null) {
@@ -161,6 +168,7 @@ public class StreamProxyController {
     @ResponseBody
     @Operation(summary = "移除代理", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "代理ID", required = true)
+    @PreAuthorize("@perm.has('proxy:edit')")
     public void delte(int id){
         log.info("移除代理： {}", id);
         streamProxyService.delete(id);
@@ -170,6 +178,7 @@ public class StreamProxyController {
     @ResponseBody
     @Operation(summary = "播放代理", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "代理Id", required = true)
+    @PreAuthorize("@perm.has('proxy:edit')")
     public DeferredResult<WVPResult<StreamContent>> start(HttpServletRequest request, int id){
         log.info("播放代理： {}", id);
         StreamProxy streamProxy = streamProxyService.getStreamProxy(id);
@@ -216,6 +225,7 @@ public class StreamProxyController {
     @ResponseBody
     @Operation(summary = "停止播放", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "代理Id", required = true)
+    @PreAuthorize("@perm.has('proxy:edit')")
     public void stop(int id){
         log.info("停止播放： {}", id);
         streamProxyPlayService.stop(id);

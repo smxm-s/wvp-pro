@@ -6,6 +6,7 @@ import com.genersoft.iot.vmp.common.CommonCallback;
 import com.genersoft.iot.vmp.common.enums.ChannelDataType;
 import com.genersoft.iot.vmp.conf.UserSetting;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
+import com.genersoft.iot.vmp.conf.security.DataScopeService;
 import com.genersoft.iot.vmp.gb28181.bean.*;
 import com.genersoft.iot.vmp.gb28181.dao.CommonGBChannelMapper;
 import com.genersoft.iot.vmp.gb28181.dao.DeviceChannelMapper;
@@ -123,6 +124,9 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private DeviceStatusManager deviceStatusManager;
+
+    @Autowired
+    private DataScopeService dataScopeService;
 
     private Device getDeviceByDeviceIdFromDb(String deviceId) {
         return deviceMapper.getDeviceByDeviceId(deviceId);
@@ -959,7 +963,10 @@ public class DeviceServiceImpl implements IDeviceService {
                     .replaceAll("%", "/%")
                     .replaceAll("_", "/_");
         }
-        List<Device> all = deviceMapper.getDeviceList(ChannelDataType.GB28181, query, status);
+        // 数据范围过滤：受限用户只能看到拥有允许行政区划通道的设备；不受限时返回 null 不改变原行为
+        Set<String> allowedCivilCodes = dataScopeService.getAllowedCivilCodes();
+        List<String> civilCodeList = allowedCivilCodes == null ? null : new ArrayList<>(allowedCivilCodes);
+        List<Device> all = deviceMapper.getDeviceList(ChannelDataType.GB28181, query, status, civilCodeList);
         return new PageInfo<>(all);
     }
 

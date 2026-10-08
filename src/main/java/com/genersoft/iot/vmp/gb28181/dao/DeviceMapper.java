@@ -433,9 +433,21 @@ public interface DeviceMapper {
             " OR device_id LIKE concat('%',#{query},'%') escape '/' " +
             " OR ip LIKE concat('%',#{query},'%') escape '/')" +
             "</if> " +
+            // 数据范围过滤：仅保留至少拥有一个允许行政区划通道的设备（civilCodeList 为 null 时不受限）
+            " <if test='civilCodeList != null'> " +
+            " <choose> " +
+            " <when test='civilCodeList.size() > 0'> " +
+            " AND EXISTS (SELECT 1 FROM wvp_device_channel dc2 WHERE dc2.data_type = #{dataType} AND dc2.data_device_id = de.id " +
+            " AND coalesce(dc2.gb_civil_code, dc2.civil_code) IN " +
+            " <foreach collection='civilCodeList' item='item' open='(' separator=',' close=')'>#{item}</foreach>) " +
+            " </when> " +
+            " <otherwise> AND 1 = 0 </otherwise> " +
+            " </choose> " +
+            " </if> " +
             " order by create_time desc, device_id " +
             " </script>")
-    List<Device> getDeviceList(@Param("dataType") Integer dataType, @Param("query") String query, @Param("status") Boolean status);
+    List<Device> getDeviceList(@Param("dataType") Integer dataType, @Param("query") String query,
+                               @Param("status") Boolean status, @Param("civilCodeList") List<String> civilCodeList);
 
     @Select("select * from wvp_device_channel where id = #{id}")
     DeviceChannel getRawChannel(@Param("id") int id);

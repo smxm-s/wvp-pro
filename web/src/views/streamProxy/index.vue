@@ -43,7 +43,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="addStreamProxy">添加代理</el-button>
+          <el-button v-permission="'proxy:edit'" icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="addStreamProxy">添加代理</el-button>
         </el-form-item>
         <el-form-item style="float: right;">
           <el-button icon="el-icon-refresh-right" circle @click="refresh()" />
@@ -98,13 +98,13 @@
             <el-divider direction="vertical" />
             <el-button v-if="scope.row.pulling" size="medium" icon="el-icon-switch-button" style="color: #f56c6c" type="text" @click="stopPlay(scope.row)">停止</el-button>
             <el-divider v-if="scope.row.pulling" direction="vertical" />
-            <el-button size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">
+            <el-button v-permission="'proxy:edit'" size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">
               编辑
             </el-button>
             <el-divider direction="vertical" />
             <el-button size="medium" icon="el-icon-cloudy" type="text" @click="queryCloudRecords(scope.row)">云端录像</el-button>
             <el-divider direction="vertical" />
-            <el-button size="medium" icon="el-icon-delete" type="text" style="color: #f56c6c" @click="deleteStreamProxy(scope.row)">删除</el-button>
+            <el-button v-permission="'proxy:edit'" size="medium" icon="el-icon-delete" type="text" style="color: #f56c6c" @click="deleteStreamProxy(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

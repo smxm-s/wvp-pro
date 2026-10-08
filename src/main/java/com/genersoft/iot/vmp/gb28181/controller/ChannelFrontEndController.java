@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "tiltSpeed", description = "垂直速度(0-100)", required = true)
     @Parameter(name = "zoomSpeed", description = "缩放速度(0-100)", required = true)
     @GetMapping("/ptz")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> ptz(Integer channelId, String command, Integer panSpeed, Integer tiltSpeed, Integer zoomSpeed){
 
         if (log.isDebugEnabled()) {
@@ -135,6 +137,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "command", description = "控制指令,允许值: in, out, stop", required = true)
     @Parameter(name = "speed", description = "光圈速度(0-100)", required = true)
     @GetMapping("/fi/iris")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> iris(Integer channelId, String command, Integer speed){
 
         if (log.isDebugEnabled()) {
@@ -189,6 +192,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "command", description = "控制指令,允许值: near, far, stop", required = true)
     @Parameter(name = "speed", description = "聚焦速度(0-100)", required = true)
     @GetMapping("/fi/focus")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> focus(Integer channelId, String command, Integer speed){
 
         if (log.isDebugEnabled()) {
@@ -239,6 +243,7 @@ public class ChannelFrontEndController {
     @Operation(summary = "查询预置位", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @GetMapping("/preset/query")
+    @PreAuthorize("@perm.has('channel:play')")
     public DeferredResult<WVPResult<List<Preset>>> queryPreset(Integer channelId) {
         if (log.isDebugEnabled()) {
             log.debug("[通用通道] 预置位查询API调用, {}", channelId);
@@ -296,6 +301,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "presetId", description = "预置位编号", required = true)
     @Parameter(name = "presetName", description = "预置位名称", required = true)
     @GetMapping("/preset/add")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> addPreset(Integer channelId, Integer presetId, String presetName) {
         FrontEndControlCodeForPreset controlCode = new FrontEndControlCodeForPreset();
         controlCode.setCode(1);
@@ -309,6 +315,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "presetId", description = "预置位编号(1-100)", required = true)
     @GetMapping("/preset/call")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> callPreset(Integer channelId, Integer presetId) {
         FrontEndControlCodeForPreset controlCode = new FrontEndControlCodeForPreset();
         controlCode.setCode(2);
@@ -321,6 +328,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "presetId", description = "预置位编号(1-100)", required = true)
     @GetMapping("/preset/delete")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> deletePreset(Integer channelId, Integer presetId) {
 
         FrontEndControlCodeForPreset controlCode = new FrontEndControlCodeForPreset();
@@ -358,6 +366,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "tourId", description = "巡航组号", required = true)
     @Parameter(name = "presetId", description = "预置位编号", required = true)
     @GetMapping("/tour/point/add")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> addTourPoint(Integer channelId, Integer tourId, Integer presetId) {
 
         FrontEndControlCodeForTour controlCode = new FrontEndControlCodeForTour();
@@ -373,6 +382,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "tourId", description = "巡航组号(1-100)", required = true)
     @Parameter(name = "presetId", description = "预置位编号(0-100, 为0时删除整个巡航)", required = true)
     @GetMapping("/tour/point/delete")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> deleteCruisePoint(Integer channelId, Integer tourId, Integer presetId) {
         FrontEndControlCodeForTour controlCode = new FrontEndControlCodeForTour();
         controlCode.setCode(2);
@@ -388,6 +398,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "speed", description = "巡航速度(1-4095)", required = true)
     @Parameter(name = "presetId", description = "预置位编号", required = true)
     @GetMapping("/tour/speed")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> setCruiseSpeed(Integer channelId, Integer tourId, Integer speed, Integer presetId) {
         FrontEndControlCodeForTour controlCode = new FrontEndControlCodeForTour();
         controlCode.setCode(3);
@@ -403,6 +414,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "time", description = "巡航停留时间(1-4095)", required = true)
     @Parameter(name = "presetId", description = "预置位编号", required = true)
     @GetMapping("/tour/time")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> setCruiseTime(Integer channelId, Integer tourId, Integer time, Integer presetId) {
         FrontEndControlCodeForTour controlCode = new FrontEndControlCodeForTour();
         controlCode.setCode(4);
@@ -416,6 +428,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "tourId", description = "巡航组号)", required = true)
     @GetMapping("/tour/start")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> startCruise(Integer channelId, Integer tourId) {
         FrontEndControlCodeForTour controlCode = new FrontEndControlCodeForTour();
         controlCode.setCode(5);
@@ -427,6 +440,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "tourId", description = "巡航组号", required = true)
     @GetMapping("/tour/stop")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> stopCruise(Integer channelId, Integer tourId) {
         FrontEndControlCodeForTour controlCode = new FrontEndControlCodeForTour();
         controlCode.setCode(6);
@@ -462,6 +476,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "scanId", description = "扫描组号(0-100)", required = true)
     @GetMapping("/scan/start")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> startScan(Integer channelId, Integer scanId) {
         FrontEndControlCodeForScan controlCode = new FrontEndControlCodeForScan();
         controlCode.setCode(1);
@@ -474,6 +489,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "scanId", description = "扫描组号(0-100)", required = true)
     @GetMapping("/scan/stop")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> stopScan(Integer channelId, Integer scanId) {
         FrontEndControlCodeForScan controlCode = new FrontEndControlCodeForScan();
         controlCode.setCode(5);
@@ -485,6 +501,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "scanId", description = "扫描组号(0-100)", required = true)
     @GetMapping("/scan/set/left")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> setScanLeft(Integer channelId, Integer scanId) {
         FrontEndControlCodeForScan controlCode = new FrontEndControlCodeForScan();
         controlCode.setCode(2);
@@ -496,6 +513,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "scanId", description = "扫描组号(0-100)", required = true)
     @GetMapping("/scan/set/right")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> setScanRight(Integer channelId, Integer scanId) {
         FrontEndControlCodeForScan controlCode = new FrontEndControlCodeForScan();
         controlCode.setCode(3);
@@ -509,6 +527,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "scanId", description = "扫描组号(0-100)", required = true)
     @Parameter(name = "speed", description = "自动扫描速度(1-4095)", required = true)
     @GetMapping("/scan/set/speed")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> setScanSpeed(Integer channelId, Integer scanId, Integer speed) {
         FrontEndControlCodeForScan controlCode = new FrontEndControlCodeForScan();
         controlCode.setCode(4);
@@ -522,6 +541,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "command", description = "控制指令,允许值: on, off", required = true)
     @GetMapping("/wiper")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> wiper(Integer channelId, String command){
 
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -565,6 +585,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "command", description = "控制指令,允许值: on, off", required = true)
     @Parameter(name = "auxiliaryId", description = "开关编号", required = true)
     @GetMapping("/auxiliary")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> auxiliarySwitch(Integer channelId, String command, Integer auxiliaryId){
 
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -606,6 +627,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "resetTime", description = "自动归位时间间隔（秒）")
     @Parameter(name = "presetIndex", description = "调用预置位编号")
     @GetMapping("/home_position")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> homePosition(Integer channelId, Boolean enabled,
                                                            @RequestParam(required = false) Integer resetTime,
                                                            @RequestParam(required = false) Integer presetIndex){
@@ -645,6 +667,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "lengthX", description = "拉框长度像素值", required = true)
     @Parameter(name = "lengthY", description = "拉框宽度像素值", required = true)
     @GetMapping("/drag_zoom_in")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> dragZoomIn(Integer channelId, int length, int width, int midPointX, int midPointY, int lengthX, int lengthY){
 
         if (log.isDebugEnabled()) {
@@ -690,6 +713,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "lengthX", description = "拉框长度像素值", required = true)
     @Parameter(name = "lengthY", description = "拉框宽度像素值", required = true)
     @GetMapping("/drag_zoom_out")
+    @PreAuthorize("@perm.has('channel:ptz')")
     public DeferredResult<WVPResult<String>> dragZoomOut(Integer channelId, Integer length, Integer width, Integer midPointX, Integer midPointY, Integer lengthX, Integer lengthY){
 
         if (log.isDebugEnabled()) {

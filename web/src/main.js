@@ -14,6 +14,7 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import permissionDirective from '@/directive/permission'
 
 import VueClipboards from 'vue-clipboards'
 import Contextmenu from 'vue-contextmenujs'
@@ -36,6 +37,9 @@ Vue.use(ElementUI)
 Vue.use(VueClipboards)
 Vue.use(Contextmenu)
 Vue.use(VueClipboard)
+
+// 功能权限控制指令 v-permission
+Vue.directive('permission', permissionDirective)
 
 Vue.config.productionTip = false
 

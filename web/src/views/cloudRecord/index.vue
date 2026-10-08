@@ -61,6 +61,7 @@
             />
           </el-select>
           <el-button
+            v-permission="'cloudRecord:delete'"
             icon="el-icon-delete"
             style="margin-right: 1rem;"
             :disabled="multipleSelection.length === 0"
@@ -117,6 +118,7 @@
             <el-button size="medium" icon="el-icon-info" type="text" @click="showDetail(scope.row)">详情
             </el-button>
             <el-button
+              v-permission="'cloudRecord:delete'"
               size="medium"
               icon="el-icon-delete"
               type="text"

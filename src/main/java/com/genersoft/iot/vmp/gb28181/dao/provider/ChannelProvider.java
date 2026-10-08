@@ -205,6 +205,33 @@ public class ChannelProvider {
                     " left join wvp_common_group wcg2 on wcg2.device_id = wcg.business_group"
             ;
 
+    /**
+     * 追加"通道行政区划在允许集合内"的数据范围过滤条件。
+     * <p>
+     * 通道与行政区划的匹配口径与项目既有实现一致：coalesce(gb_civil_code, civil_code) = 区划节点 device_id。
+     * 当 civilCodeList 为 null 时不追加任何条件，保持改造前的行为完全一致。
+     */
+    private void appendCivilCodeScope(StringBuilder sqlBuild, Map<String, Object> params) {
+        Object value = params.get("civilCodeList");
+        if (value == null) {
+            return;
+        }
+        List<String> civilCodeList = (List<String>) value;
+        if (civilCodeList.isEmpty()) {
+            // 允许集合为空，表示无任何可访问通道
+            sqlBuild.append(" AND 1 = 0 ");
+            return;
+        }
+        sqlBuild.append(" AND coalesce(gb_civil_code, civil_code) in ( ");
+        for (int i = 0; i < civilCodeList.size(); i++) {
+            if (i > 0) {
+                sqlBuild.append(",");
+            }
+            sqlBuild.append("#{civilCodeList[").append(i).append("]}");
+        }
+        sqlBuild.append(" ) ");
+    }
+
     public String queryByDeviceId(Map<String, Object> params ){
         return BASE_SQL + " where channel_type = 0 and coalesce(gb_device_id, device_id) = #{gbDeviceId}";
     }
@@ -240,6 +267,7 @@ public class ChannelProvider {
         if (params.get("dataType") != null) {
             sqlBuild.append(" AND data_type = #{dataType}");
         }
+        appendCivilCodeScope(sqlBuild, params);
         return sqlBuild.toString();
     }
 
@@ -266,6 +294,7 @@ public class ChannelProvider {
         if (params.get("dataType") != null) {
             sqlBuild.append(" AND data_type = #{dataType}");
         }
+        appendCivilCodeScope(sqlBuild, params);
         return sqlBuild.toString();
     }
 
@@ -296,6 +325,7 @@ public class ChannelProvider {
         if (params.get("parentDeviceId") != null) {
             sqlBuild.append(" AND coalesce(gb_parent_id, parent_id) =  #{parentDeviceId}");
         }
+        appendCivilCodeScope(sqlBuild, params);
         sqlBuild.append(" order by create_time desc");
         return sqlBuild.toString();
     }

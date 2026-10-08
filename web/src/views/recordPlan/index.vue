@@ -13,7 +13,7 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button size="mini" type="primary" @click="add()">
+          <el-button v-permission="'recordPlan:edit'" size="mini" type="primary" @click="add()">
             添加
           </el-button>
         </el-form-item>
@@ -37,8 +37,8 @@
         <el-table-column label="操作" width="300" fixed="right">
           <template v-slot:default="scope">
             <el-button size="medium" icon="el-icon-link" type="text" @click="link(scope.row)">关联通道</el-button>
-            <el-button size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">编辑</el-button>
-            <el-button size="medium" icon="el-icon-delete" style="color: #f56c6c" type="text" @click="deletePlan(scope.row)">删除</el-button>
+            <el-button v-permission="'recordPlan:edit'" size="medium" icon="el-icon-edit" type="text" @click="edit(scope.row)">编辑</el-button>
+            <el-button v-permission="'recordPlan:edit'" size="medium" icon="el-icon-delete" style="color: #f56c6c" type="text" @click="deletePlan(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

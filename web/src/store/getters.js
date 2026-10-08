@@ -6,6 +6,9 @@ const getters = {
   serverId: state => state.user.serverId,
   name: state => state.user.name,
   defaultPassword: state => state.user.defaultPassword,
+  permissions: state => state.user.permissions,
+  superAdmin: state => state.user.superAdmin,
+  roleName: state => state.user.roleName,
   visitedViews: state => state.tagsView.visitedViews,
   cachedViews: state => state.tagsView.cachedViews
 }

@@ -159,6 +159,7 @@
             </el-button>
             <el-divider direction="vertical" />
             <el-button
+              v-permission="'device:edit'"
               size="medium"
               type="text"
               icon="el-icon-edit"

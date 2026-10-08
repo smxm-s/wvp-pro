@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class RecordPlanController {
     @PostMapping("/add")
     @Operation(summary = "添加录制计划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "plan", description = "计划", required = true)
+    @PreAuthorize("@perm.has('recordPlan:edit')")
     public void add(@RequestBody RecordPlan plan) {
         if (plan.getPlanItemList() == null || plan.getPlanItemList().isEmpty()) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "添加录制计划时，录制计划不可为空");
@@ -50,6 +52,7 @@ public class RecordPlanController {
     @PostMapping("/link")
     @Operation(summary = "通道关联录制计划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "param", description = "通道关联录制计划", required = true)
+    @PreAuthorize("@perm.has('recordPlan:edit')")
     public void link(@RequestBody RecordPlanParam param) {
         if (param.getAllLink() != null) {
             if (param.getAllLink()) {
@@ -80,6 +83,7 @@ public class RecordPlanController {
     @GetMapping("/get")
     @Operation(summary = "查询录制计划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "planId", description = "计划ID", required = true)
+    @PreAuthorize("@perm.has('recordPlan:view')")
     public RecordPlan get(Integer planId) {
         if (planId == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "计划ID不可为NULL");
@@ -93,6 +97,7 @@ public class RecordPlanController {
     @Parameter(name = "query", description = "检索内容", required = false)
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
+    @PreAuthorize("@perm.has('recordPlan:view')")
     public PageInfo<RecordPlan> query(@RequestParam(required = false) String query, @RequestParam Integer page, @RequestParam Integer count) {
         if (query != null && ObjectUtils.isEmpty(query.trim())) {
             query = null;
@@ -110,6 +115,7 @@ public class RecordPlanController {
     @Parameter(name = "hasLink", description = "是否已经关联")
     @GetMapping("/channel/list")
     @ResponseBody
+    @PreAuthorize("@perm.has('recordPlan:view')")
     public PageInfo<CommonGBChannel> queryChannelList(int page, int count,
                                                       @RequestParam(required = false) Integer planId,
                                                       @RequestParam(required = false) String query,
@@ -129,6 +135,7 @@ public class RecordPlanController {
     @PostMapping("/update")
     @Operation(summary = "更新录制计划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "plan", description = "计划", required = true)
+    @PreAuthorize("@perm.has('recordPlan:edit')")
     public void update(@RequestBody RecordPlan plan) {
         if (plan == null || plan.getId() == 0) {
             throw new ControllerException(ErrorCode.ERROR400);
@@ -140,6 +147,7 @@ public class RecordPlanController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除录制计划", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "planId", description = "计划ID", required = true)
+    @PreAuthorize("@perm.has('recordPlan:edit')")
     public void delete(Integer planId) {
         if (planId == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "计划IDID不可为NULL");

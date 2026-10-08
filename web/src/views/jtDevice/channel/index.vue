@@ -16,7 +16,7 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="add">添加通道</el-button>
+          <el-button v-permission="'jt:edit'" icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="add">添加通道</el-button>
         </el-form-item>
         <el-form-item style="float: right;">
           <el-button icon="el-icon-refresh-right" circle @click="refresh()" />
@@ -83,6 +83,7 @@
                 </el-button>
                 <el-divider direction="vertical" />
                 <el-button
+                  v-permission="'jt:edit'"
                   size="medium"
                   type="text"
                   icon="el-icon-edit"

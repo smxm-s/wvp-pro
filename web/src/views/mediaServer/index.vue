@@ -1,7 +1,7 @@
 <template>
   <div id="mediaServerManger" class="app-container" style="height: calc(100vh - 124px);">
     <el-form :inline="true" size="mini" style="margin-bottom: 1rem">
-      <el-button icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="add">添加节点</el-button>
+      <el-button v-permission="'mediaServer:edit'" icon="el-icon-plus" size="mini" style="margin-right: 1rem;" type="primary" @click="add">添加节点</el-button>
     </el-form>
     <el-row :gutter="12">
       <el-col v-for="item in mediaServerList" :key="item.id" :span="getNumberByWidth()">
@@ -11,9 +11,9 @@
           <div style="padding: 14px;text-align: left">
             <span style="font-size: 16px">{{ item.id }}</span>
             <div style="float: right">
-              <el-button v-if="!item.defaultServer" icon="el-icon-delete" circle size="mini" @click="del(item)"></el-button>
-              <el-button v-if="!item.defaultServer" icon="el-icon-edit"  circle size="mini" @click="edit(item)"></el-button>
-              <el-button v-if="item.defaultServer" icon="el-icon-edit"  circle size="mini" @click="edit(item)"></el-button>
+              <el-button v-permission="'mediaServer:edit'" v-if="!item.defaultServer" icon="el-icon-delete" circle size="mini" @click="del(item)"></el-button>
+              <el-button v-permission="'mediaServer:edit'" v-if="!item.defaultServer" icon="el-icon-edit"  circle size="mini" @click="edit(item)"></el-button>
+              <el-button v-permission="'mediaServer:edit'" v-if="item.defaultServer" icon="el-icon-edit"  circle size="mini" @click="edit(item)"></el-button>
             </div>
 
             <div style="margin-top: 13px; line-height: 12px; ">

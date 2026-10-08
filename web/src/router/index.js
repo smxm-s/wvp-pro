@@ -57,7 +57,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: '控制台',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '控制台', icon: 'dashboard', affix: true }
+      meta: { title: '控制台', icon: 'dashboard', affix: true, permission: 'dashboard:view' }
     }]
   },
 
@@ -69,7 +69,7 @@ export const constantRoutes = [
       path: '',
       name: 'Live',
       component: () => import('@/views/live/index'),
-      meta: { title: '分屏监控', icon: 'live' }
+      meta: { title: '分屏监控', icon: 'live', permission: 'channel:play' }
     }]
   },
   {
@@ -81,7 +81,7 @@ export const constantRoutes = [
       path: '/channel',
       name: 'Channel',
       component: () => import('@/views/channel/index'),
-      meta: { title: '通道列表', icon: 'channelManger' }
+      meta: { title: '通道列表', icon: 'channelManger', permission: 'org:view' }
     },
     {
       path: '/channel/record/:channelId',
@@ -99,7 +99,7 @@ export const constantRoutes = [
       path: '',
       name: 'Map',
       component: () => import('@/views/map/index'),
-      meta: { title: '电子地图', icon: 'map' }
+      meta: { title: '电子地图', icon: 'map', permission: 'map:view' }
     }]
   },
   {
@@ -112,7 +112,7 @@ export const constantRoutes = [
         path: '/device',
         name: 'Device',
         component: () => import('@/views/device/index'),
-        meta: { title: '国标设备', icon: 'device' }
+        meta: { title: '国标设备', icon: 'device', permission: 'device:view' }
       },
       {
         hidden: true,
@@ -125,7 +125,7 @@ export const constantRoutes = [
         path: '/jtDevice',
         name: 'JTDevice',
         component: () => import('@/views/jtDevice/index'),
-        meta: { title: '部标设备', icon: 'jtDevice' }
+        meta: { title: '部标设备', icon: 'jtDevice', permission: 'jt:view' }
       },
       {
         hidden: true,
@@ -138,13 +138,13 @@ export const constantRoutes = [
         path: '/push',
         name: 'PushList',
         component: () => import('@/views/streamPush/index'),
-        meta: { title: '推流列表', icon: 'streamPush' }
+        meta: { title: '推流列表', icon: 'streamPush', permission: 'push:view' }
       },
       {
         path: '/proxy',
         name: 'Proxy',
         component: () => import('@/views/streamProxy/index'),
-        meta: { title: '拉流代理', icon: 'streamProxy' }
+        meta: { title: '拉流代理', icon: 'streamProxy', permission: 'proxy:view' }
       }
     ]
   },
@@ -159,13 +159,13 @@ export const constantRoutes = [
         path: 'region',
         name: 'Region',
         component: () => import('@/views/channel/region/index'),
-        meta: { title: '行政区划', icon: 'region' }
+        meta: { title: '行政区划', icon: 'region', permission: 'org:view' }
       },
       {
         path: 'group',
         name: 'Group',
         component: () => import('@/views/channel/group/index'),
-        meta: { title: '业务分组', icon: 'tree' }
+        meta: { title: '业务分组', icon: 'tree', permission: 'org:view' }
       }
     ]
   },
@@ -178,7 +178,7 @@ export const constantRoutes = [
         path: '',
         name: 'AlarmManage',
         component: () => import('@/views/alarm/index'),
-        meta: { title: '报警管理', icon: 'el-icon-bell' }
+        meta: { title: '报警管理', icon: 'el-icon-bell', permission: 'alarm:view' }
       }
     ]
   },
@@ -191,7 +191,7 @@ export const constantRoutes = [
         path: '',
         name: 'RecordPlan',
         component: () => import('@/views/recordPlan/index'),
-        meta: { title: '录制计划', icon: 'recordPlan' }
+        meta: { title: '录制计划', icon: 'recordPlan', permission: 'recordPlan:view' }
       }
     ]
   },
@@ -205,7 +205,7 @@ export const constantRoutes = [
         path: '/cloudRecord',
         name: 'CloudRecord',
         component: () => import('@/views/cloudRecord/index'),
-        meta: { title: '云端录像', icon: 'cloudRecord' }
+        meta: { title: '云端录像', icon: 'cloudRecord', permission: 'cloudRecord:view' }
       },
       {
         path: '/cloudRecord/detail/:app/:stream',
@@ -224,7 +224,7 @@ export const constantRoutes = [
         path: '',
         name: 'MediaServer',
         component: () => import('@/views/mediaServer/index'),
-        meta: { title: '媒体节点', icon: 'mediaServerList' }
+        meta: { title: '媒体节点', icon: 'mediaServerList', permission: 'mediaServer:view' }
       }
     ]
   },
@@ -237,7 +237,7 @@ export const constantRoutes = [
         path: '',
         name: 'Platform',
         component: () => import('@/views/platform/index'),
-        meta: { title: '国标级联', icon: 'platform' }
+        meta: { title: '国标级联', icon: 'platform', permission: 'platform:view' }
       }
     ]
   },
@@ -250,7 +250,7 @@ export const constantRoutes = [
         path: '',
         name: 'User',
         component: () => import('@/views/user/index'),
-        meta: { title: '用户管理', icon: 'user' }
+        meta: { title: '用户管理', icon: 'user', permission: 'user:view' }
       }
     ]
   },
@@ -277,19 +277,19 @@ export const constantRoutes = [
         path: '/operations/systemInfo',
         name: 'OperationsSystemInfo',
         component: () => import('@/views/operations/systemInfo'),
-        meta: { title: '平台信息', icon: 'systemInfo' }
+        meta: { title: '平台信息', icon: 'systemInfo', permission: 'system:view' }
       },
       {
         path: '/operations/historyLog',
         name: 'OperationsHistoryLog',
         component: () => import('@/views/operations/historyLog'),
-        meta: { title: '历史日志', icon: 'historyLog' }
+        meta: { title: '历史日志', icon: 'historyLog', permission: 'log:view' }
       },
       {
         path: '/operations/realLog',
         name: 'OperationsRealLog',
         component: () => import('@/views/operations/realLog'),
-        meta: { title: '实时日志', icon: 'realLog' }
+        meta: { title: '实时日志', icon: 'realLog', permission: 'log:view' }
       }
     ]
   },

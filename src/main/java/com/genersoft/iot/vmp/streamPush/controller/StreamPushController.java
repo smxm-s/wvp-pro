@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -78,6 +79,7 @@ public class StreamPushController {
     @Parameter(name = "query", description = "查询内容")
     @Parameter(name = "pushing", description = "是否正在推流")
     @Parameter(name = "mediaServerId", description = "流媒体ID")
+    @PreAuthorize("@perm.has('push:view')")
     public PageInfo<StreamPush> list(@RequestParam(required = false)Integer page,
                                      @RequestParam(required = false)Integer count,
                                      @RequestParam(required = false)String query,
@@ -99,6 +101,7 @@ public class StreamPushController {
     @ResponseBody
     @Operation(summary = "删除", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "应用名", required = true)
+    @PreAuthorize("@perm.has('push:edit')")
     public void delete(int id){
         if (streamPushService.delete(id) <= 0){
             throw new ControllerException(ErrorCode.ERROR100);
@@ -107,6 +110,7 @@ public class StreamPushController {
 
     @PostMapping(value = "upload")
     @ResponseBody
+    @PreAuthorize("@perm.has('push:edit')")
     public DeferredResult<ResponseEntity<WVPResult<Object>>> uploadChannelFile(@RequestParam(value = "file") MultipartFile file){
 
         // 最多处理文件一个小时
@@ -216,6 +220,7 @@ public class StreamPushController {
     @PostMapping(value = "/add")
     @ResponseBody
     @Operation(summary = "添加推流信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('push:edit')")
     public StreamPush add(@RequestBody StreamPush stream){
         if (ObjectUtils.isEmpty(stream.getGbId())) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "国标ID不可为空");
@@ -236,6 +241,7 @@ public class StreamPushController {
     @PostMapping(value = "/update")
     @ResponseBody
     @Operation(summary = "更新推流信息", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('push:edit')")
     public void update(@RequestBody StreamPush stream){
         if (ObjectUtils.isEmpty(stream.getId())) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "ID不可为空");
@@ -248,6 +254,7 @@ public class StreamPushController {
     @DeleteMapping(value = "/batchRemove")
     @ResponseBody
     @Operation(summary = "删除多个推流", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('push:edit')")
     public void batchStop(@RequestBody BatchRemoveParam ids){
         if(ids.getIds().isEmpty()) {
             return;
@@ -258,6 +265,7 @@ public class StreamPushController {
     @GetMapping(value = "/start")
     @ResponseBody
     @Operation(summary = "开始播放", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('push:edit')")
     public DeferredResult<WVPResult<StreamContent>> start(HttpServletRequest request, Integer id){
         Assert.notNull(id, "推流ID不可为NULL");
         DeferredResult<WVPResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
@@ -288,6 +296,7 @@ public class StreamPushController {
     @GetMapping(value = "/forceClose")
     @ResponseBody
     @Operation(summary = "强制停止推流", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('push:edit')")
     public void stop(String app, String stream){
 
         streamPushPlayService.stop(app, stream);

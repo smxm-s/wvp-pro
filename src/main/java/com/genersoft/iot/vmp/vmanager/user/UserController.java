@@ -4,9 +4,11 @@ import com.genersoft.iot.vmp.conf.UserSetting;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
 import com.genersoft.iot.vmp.conf.security.PasswordComplexityValidator;
+import com.genersoft.iot.vmp.conf.security.PermissionService;
 import com.genersoft.iot.vmp.conf.security.SecurityUtils;
 import com.genersoft.iot.vmp.conf.security.dto.LoginUser;
 import com.genersoft.iot.vmp.service.IRoleService;
+import com.genersoft.iot.vmp.service.IUserRegionService;
 import com.genersoft.iot.vmp.service.IUserService;
 import com.genersoft.iot.vmp.storager.dao.dto.Role;
 import com.genersoft.iot.vmp.storager.dao.dto.User;
@@ -19,6 +21,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
@@ -28,7 +31,11 @@ import javax.security.sasl.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name  = "用户管理")
 @RestController
@@ -49,6 +56,12 @@ public class UserController {
 
     @Autowired
     private PasswordComplexityValidator passwordComplexityValidator;
+
+    @Autowired
+    private PermissionService permissionService;
+
+    @Autowired
+    private IUserRegionService userRegionService;
 
     @GetMapping("/login")
     @PostMapping("/login")
@@ -74,12 +87,28 @@ public class UserController {
         return user;
     }
 
+    @GetMapping("/permission")
+    @Operation(summary = "获取当前登录用户的权限", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    public Map<String, Object> getMyPermission() {
+        LoginUser loginUser = SecurityUtils.getUserInfo();
+        if (loginUser == null) {
+            throw new ControllerException(ErrorCode.ERROR403);
+        }
+        Role role = loginUser.getRole();
+        Map<String, Object> result = new HashMap<>();
+        result.put("roleId", role == null ? null : role.getId());
+        result.put("roleName", role == null ? null : role.getName());
+        result.put("superAdmin", role != null && role.getId() == PermissionService.SUPER_ADMIN_ROLE_ID);
+        result.put("permissions", permissionService.getCurrentPermissions());
+        return result;
+    }
 
     @PostMapping("/changePassword")
     @Operation(summary = "修改密码", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "username", description = "用户名", required = true)
     @Parameter(name = "oldpassword", description = "旧密码（已md5加密的密码）", required = true)
     @Parameter(name = "password", description = "新密码（未md5加密的密码）", required = true)
+    // 自助改密，不校验权限（默认密码强制修改流程依赖此接口）
     public void changePassword(@RequestParam String oldPassword, @RequestParam String password){
         // 获取当前登录用户id
         LoginUser userInfo = SecurityUtils.getUserInfo();
@@ -113,6 +142,7 @@ public class UserController {
     @Parameter(name = "username", description = "用户名", required = true)
     @Parameter(name = "password", description = "密码（未md5加密的密码）", required = true)
     @Parameter(name = "roleId", description = "角色ID", required = true)
+    @PreAuthorize("@perm.has('user:edit')")
     public void add(@RequestParam String username,
                                                  @RequestParam String password,
                                                  @RequestParam Integer roleId){
@@ -151,6 +181,7 @@ public class UserController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除用户", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "用户Id", required = true)
+    @PreAuthorize("@perm.has('user:edit')")
     public void delete(@RequestParam Integer id){
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
@@ -162,12 +193,51 @@ public class UserController {
         if (deleteResult <= 0) {
             throw new ControllerException(ErrorCode.ERROR100);
         }
+        // 同步清理该用户的区域绑定
+        userRegionService.saveUserRegions(id, Collections.emptyList());
     }
 
     @GetMapping("/all")
     @Operation(summary = "查询全部用户", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @PreAuthorize("@perm.has('user:view')")
     public List<User> all(){
         return userService.getAllUsers();
+    }
+
+    @GetMapping("/region")
+    @Operation(summary = "查询用户绑定的区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @Parameter(name = "userId", description = "用户Id", required = true)
+    @PreAuthorize("@perm.has('user:view')")
+    public List<Integer> getRegion(@RequestParam Integer userId) {
+        return userRegionService.getRegionIdsByUserId(userId);
+    }
+
+    @PostMapping("/region/save")
+    @Operation(summary = "保存用户绑定的区域", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @Parameter(name = "userId", description = "用户Id", required = true)
+    @Parameter(name = "regionIds", description = "区域Id列表，逗号分隔")
+    @PreAuthorize("@perm.has('user:edit')")
+    public void saveRegion(@RequestParam Integer userId, @RequestParam(required = false) String regionIds) {
+        // 只有超级管理员可以维护用户的区域绑定
+        int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
+        if (currenRoleId != 1) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "用户无权限");
+        }
+        List<Integer> regionIdList = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(regionIds)) {
+            for (String regionId : regionIds.split(",")) {
+                String trimmed = regionId.trim();
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                try {
+                    regionIdList.add(Integer.parseInt(trimmed));
+                } catch (NumberFormatException e) {
+                    throw new ControllerException(ErrorCode.ERROR400.getCode(), "regionIds参数格式错误");
+                }
+            }
+        }
+        userRegionService.saveUserRegions(userId, regionIdList);
     }
 
     /**
@@ -181,6 +251,7 @@ public class UserController {
     @Operation(summary = "分页查询用户", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
+    @PreAuthorize("@perm.has('user:view')")
     public PageInfo<User> users(int page, int count) {
         return userService.getUsers(page, count);
     }
@@ -189,6 +260,7 @@ public class UserController {
     @Operation(summary = "修改pushkey", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "userId", description = "用户Id", required = true)
     @Parameter(name = "pushKey", description = "新的pushKey", required = true)
+    @PreAuthorize("@perm.has('user:edit')")
     public void changePushKey(@RequestParam Integer userId,@RequestParam String pushKey) {
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
@@ -208,6 +280,7 @@ public class UserController {
     @Parameter(name = "adminId", description = "管理员id", required = true)
     @Parameter(name = "userId", description = "用户id", required = true)
     @Parameter(name = "password", description = "新密码（未md5加密的密码）", required = true)
+    @PreAuthorize("@perm.has('user:edit')")
     public void changePasswordForAdmin(@RequestParam int userId, @RequestParam String password) {
         // 获取当前登录用户id
         LoginUser userInfo = SecurityUtils.getUserInfo();
@@ -231,6 +304,7 @@ public class UserController {
 
     @PostMapping("/userInfo")
     @Operation(summary = "查询当前登录用户信息")
+    // 查询自身信息，不校验权限
     public LoginUser getUserInfo() {
         // 获取当前登录用户id
         LoginUser userInfo = SecurityUtils.getUserInfo();

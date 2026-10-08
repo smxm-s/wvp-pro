@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +50,7 @@ public class UserApiKeyController {
     @Parameter(name = "remark", description = "备注信息", required = false)
     @Parameter(name = "expiredAt", description = "过期时间（不传代表永不过期）", required = false)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:edit')")
     public synchronized void add(
             @RequestParam(required = true) int userId,
             @RequestParam(required = false) String app,
@@ -112,6 +114,7 @@ public class UserApiKeyController {
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:view')")
     public PageInfo<UserApiKey> userApiKeys(@RequestParam(required = true) int page, @RequestParam(required = true) int count, @RequestParam(required = false) Integer userId) {
         return userApiKeyService.getUserApiKeys(page, count, userId);
     }
@@ -120,6 +123,7 @@ public class UserApiKeyController {
     @Operation(summary = "启用用户ApiKey", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "用户ApiKeyId", required = true)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:edit')")
     public void enable(@RequestParam(required = true) Integer id) {
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
@@ -143,6 +147,7 @@ public class UserApiKeyController {
     @Operation(summary = "停用用户ApiKey", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "用户ApiKeyId", required = true)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:edit')")
     public void disable(@RequestParam(required = true) Integer id) {
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
@@ -166,6 +171,7 @@ public class UserApiKeyController {
     @Operation(summary = "重置用户ApiKey", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "用户ApiKeyId", required = true)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:edit')")
     public void reset(@RequestParam(required = true) Integer id) {
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
@@ -208,6 +214,7 @@ public class UserApiKeyController {
     @Parameter(name = "id", description = "用户ApiKeyId", required = true)
     @Parameter(name = "remark", description = "用户ApiKey备注", required = false)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:edit')")
     public void remark(@RequestParam(required = true) Integer id, @RequestParam(required = false) String remark) {
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();
@@ -230,6 +237,7 @@ public class UserApiKeyController {
     @Operation(summary = "删除用户ApiKey", security = @SecurityRequirement(name = JwtUtils.HEADER))
     @Parameter(name = "id", description = "用户ApiKeyId", required = true)
     @Transactional
+    @PreAuthorize("@perm.has('apiKey:edit')")
     public void delete(@RequestParam(required = true) Integer id) {
         // 获取当前登录用户id
         int currenRoleId = SecurityUtils.getUserInfo().getRole().getId();

@@ -43,7 +43,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button icon="el-icon-plus" style="margin-right: 1rem;" type="primary" @click="addStream">添加
+          <el-button v-permission="'push:edit'" icon="el-icon-plus" style="margin-right: 1rem;" type="primary" @click="addStream">添加
           </el-button>
           <el-button-group>
             <el-button icon="el-icon-upload2" @click="importChannel">
@@ -58,6 +58,7 @@
             </el-button>
           </el-button-group>
           <el-button
+            v-permission="'push:edit'"
             icon="el-icon-delete"
             style="margin-left: 1rem;"
             :disabled="multipleSelection.length === 0"
@@ -119,9 +120,9 @@
             <el-button size="medium" :loading="scope.row.playLoading" icon="el-icon-video-play" type="text" @click="playPush(scope.row)">播放
             </el-button>
             <el-divider direction="vertical" />
-            <el-button size="medium" icon="el-icon-delete" type="text" style="color: #f56c6c" @click="deletePush(scope.row.id)">删除</el-button>
+            <el-button v-permission="'push:edit'" size="medium" icon="el-icon-delete" type="text" style="color: #f56c6c" @click="deletePush(scope.row.id)">删除</el-button>
             <el-divider direction="vertical" />
-            <el-button size="medium" icon="el-icon-position" type="text" @click="edit(scope.row)">
+            <el-button v-permission="'push:edit'" size="medium" icon="el-icon-position" type="text" @click="edit(scope.row)">
               编辑
             </el-button>
             <el-button size="medium" icon="el-icon-cloudy" type="text" @click="queryCloudRecords(scope.row)">云端录像

@@ -57,7 +57,7 @@
         </el-form-item>
         <el-form-item >
           <el-dropdown >
-            <el-button type="primary">
+            <el-button v-permission="'org:edit'" type="primary">
               批量操作<i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
@@ -131,6 +131,7 @@
             </el-button>
             <el-divider direction="vertical" />
             <el-button
+              v-permission="'org:edit'"
               size="medium"
               type="text"
               icon="el-icon-edit"

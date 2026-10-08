@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +66,7 @@ public class GBRecordController {
 	@Parameter(name = "startTime", description = "开始时间", required = true)
 	@Parameter(name = "endTime", description = "结束时间", required = true)
 	@GetMapping("/query/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public DeferredResult<WVPResult<RecordInfo>> recordinfo(@PathVariable String deviceId, @PathVariable String channelId, String startTime, String endTime){
 
 
@@ -108,6 +110,7 @@ public class GBRecordController {
 	@Parameter(name = "endTime", description = "结束时间", required = true)
 	@Parameter(name = "downloadSpeed", description = "下载倍速", required = true)
 	@GetMapping("/download/start/{deviceId}/{channelId}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public DeferredResult<WVPResult<StreamContent>> download(HttpServletRequest request, @PathVariable String deviceId, @PathVariable String channelId,
 															 String startTime, String endTime, String downloadSpeed) {
 
@@ -163,6 +166,7 @@ public class GBRecordController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "stream", description = "流ID", required = true)
 	@GetMapping("/download/stop/{deviceId}/{channelId}/{stream}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public void downloadStop(@PathVariable String deviceId, @PathVariable String channelId, @PathVariable String stream) {
 
 		if (log.isDebugEnabled()) {
@@ -189,6 +193,7 @@ public class GBRecordController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "stream", description = "流ID", required = true)
 	@GetMapping("/download/progress/{deviceId}/{channelId}/{stream}")
+	@PreAuthorize("@perm.has('channel:record')")
 	public StreamContent getProgress(@PathVariable String deviceId, @PathVariable String channelId, @PathVariable String stream) {
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
 		if (device == null) {

@@ -400,7 +400,7 @@ create table IF NOT EXISTS wvp_user_role
 (
     id          serial primary key COMMENT '主键ID',
     name        character varying(50) COMMENT '角色名称',
-    authority   character varying(50) COMMENT '权限标识',
+    authority   character varying(1000) COMMENT '权限标识（逗号分隔的权限码）',
     create_time character varying(50) COMMENT '创建时间',
     update_time character varying(50) COMMENT '更新时间'
 );
@@ -429,6 +429,15 @@ VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 1, '2021-04-13 14:14:57'
 -- 初始化管理员角色
 INSERT INTO wvp_user_role
 VALUES (1, 'admin', '0', '2021-04-13 14:14:57', '2021-04-13 14:14:57');
+
+-- 初始化业务角色（安全负责人 / 安全监督人）
+-- 说明：authority 为逗号分隔的权限码；role_id=1（admin）为超级管理员，代码中直接放行，无需配置
+-- 安全负责人：可管理业务，但不能管理平台/媒体节点/用户/API Key
+INSERT INTO wvp_user_role (id, name, authority, create_time, update_time)
+VALUES (2, '安全负责人', 'dashboard:view,device:view,device:edit,channel:play,channel:ptz,channel:record,channel:broadcast,cloudRecord:view,cloudRecord:delete,recordPlan:view,recordPlan:edit,proxy:view,proxy:edit,push:view,push:edit,platform:view,org:view,org:edit,map:view,alarm:view,alarm:handle,jt:view,jt:edit,mediaServer:view,log:view,system:view', '2021-04-13 14:14:57', '2021-04-13 14:14:57');
+-- 安全监督人：只读 + 实时预览（含控制台所需的系统/节点状态查看权限）
+INSERT INTO wvp_user_role (id, name, authority, create_time, update_time)
+VALUES (3, '安全监督人', 'dashboard:view,device:view,channel:play,channel:record,cloudRecord:view,recordPlan:view,proxy:view,push:view,platform:view,org:view,map:view,alarm:view,jt:view,mediaServer:view,system:view', '2021-04-13 14:14:57', '2021-04-13 14:14:57');
 
 -- 通用分组表，存储行业或组织结构
 drop table IF EXISTS wvp_common_group;
@@ -459,6 +468,17 @@ create table IF NOT EXISTS wvp_common_region
     create_time      varchar(50)  NOT NULL COMMENT '创建时间',
     update_time      varchar(50)  NOT NULL COMMENT '更新时间',
     constraint uk_common_region_device_id unique (device_id)
+);
+
+-- 用户-区域绑定（数据级权限：用户只能看到自己负责区域下的通道）
+drop table IF EXISTS wvp_user_region;
+create table IF NOT EXISTS wvp_user_region
+(
+    id          serial primary key COMMENT '主键ID',
+    user_id     int          NOT NULL COMMENT '用户ID',
+    region_id   int          NOT NULL COMMENT '区域节点ID（对应 wvp_common_region.id）',
+    create_time varchar(50)  NOT NULL COMMENT '创建时间',
+    constraint uk_user_region unique (user_id, region_id)
 );
 
 -- 录像计划基础信息
